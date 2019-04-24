@@ -19,10 +19,10 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 2. Create task/feature branch of the master repository on Bash `git branch <feature_branch_name>`
 3. Link the master and branch `git push -u origin <feature_branch_name>`
 4. Switch `head` to the branch `git checkout <feature_branch_name>`
-5. Work on the local repository and push the changes to the repository `git commit -a -m "<commit_message>"`
+5. Work on the local repository and git add and commit the changes to the repository `git commit -a -m "<commit_message>"`, and then push the changes to the respository
 6. Send a pull request from the branch to master
 7. A team mate who did not send the pull request will review and merge or decline the pull request 
-8. Once done with the branch, close the branch
+8. Once done with the branch, close and delete the branch `git branch -d <feature_branch_name>`
 
 ### Communication
 To ensure open and transparent communication create an issue in the master repository. When there are task oriented issues, before working on the task add a comment assigning the task to yourself.
