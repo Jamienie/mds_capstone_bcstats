@@ -1,0 +1,63 @@
+---
+title: "BC Stats Proposal"
+output: github_notebook
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(tidyverse)
+
+
+```
+
+
+# Executive Summary
+
+
+
+# Introduction
+
+The BC Public Service conducts a work environment survey(WES) of their employees to gain insight into workplace experience. The WES survey measures metrics like job satisifcation and engagement. This infomration helps the BC Public Service to understand and make improvements for its employees. 
+
+After each survey the results are rolled up into several reports which show the themes of the qualitative results, the correlation between themes and quantitive results at the organization level, minstry level and branch level. 
+
+This project aims to answer three research questions about the BC Public WES results which range from automating annual processes to new analysis that have not been done with the results.   
+
+### Research Questions
+
+1. What is the best method to code the themes and sub-themes to the qualitative responses?
+
+2. How well does the sentiment of the qualitative responses agree with the quantitative responses?
+
+3. What trends exist over time and across departments from the 2008 to 2018 quantitative survey data?
+
+
+
+
+
+
+
+
+# Data Science Techniques (Aaron's section)
+
+
+
+
+
+
+
+
+
+
+
+# Timeline (Fan's Section)
+
+
+
+
+
+
+
+
+
+
+
