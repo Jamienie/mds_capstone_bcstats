@@ -55,6 +55,7 @@ A brief outline of out milestones and deadlines are tabulated below:
 | rends Across Ministries and Overtime | 5                                |
 
 <br>
+
 **Table 2. Milestone Timeline**
 
 | Milestone          | Submission Due date                        |
