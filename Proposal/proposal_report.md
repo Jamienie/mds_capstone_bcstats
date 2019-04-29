@@ -6,6 +6,48 @@ Questions
 
 # Introduction
 
+The BC Public Service is committed to understanding the challenges
+within the workplace so they can make continuous improvements for their
+employees. One of the ways this is quantified is through the work
+environment survey (WES) which aims to measure key drivers like job
+satisfaction and engagement. The results of the survey are summarized
+into two main reports explaining the qualitative and quantitative data
+at the organization, ministry and department level.
+
+This project has two main objectives which is to automate qualitative
+labeling and to gain new insights about the qualitative and quantitative
+data. Currently before the qualitative report can be generated the
+responses have to be manually coded into more than 60 sub-themes, we
+would like to automate this process to reduce the time and cost of
+generating the qualitative report. There are two new insights we will
+provide, the first is relating the qualitative and quantitative
+responses which will help the BC Public Service to understand how the
+qualitative and quantitative reports support each other. The second
+analysis will look at how the key drivers have changed over time and
+what factors may have contributed, this analysis will help the BC Public
+Service to see historic trends within their organization.
+
+The objectives have been broken into three research questions:
+
+1.  What is the best method to code the themes and sub-themes to the
+    qualitative responses?
+
+2.  How well does the sentiment of the qualitative responses agree with
+    the quantitative responses?
+
+3.  What trends in key engagement drivers and multiple choice questions
+    exist over time and across departments from the 2008 to 2018
+    quantitative survey data?
+
+There will be one main deliverable provided for each research question.
+The first deliverable will be a model that can be used to classify
+future qualitative data into themes and sub-themes. The next deliverable
+will be a report explaining how well the qualitative and quantitative
+data relates to each other. The final deliverable will be an interactive
+report in the form of a dashboard that will visualize how the key
+drivers have changed over time at the organizational, ministry and
+department level.
+
 # Data Science Techniques (Aaron’s section)
 
 # Timeline
