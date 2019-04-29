@@ -30,32 +30,20 @@ deliverables - model - report - dashboard
 Data Science Techniques (Aaron's section)
 =========================================
 
-Timeline (Fan's Section)
-========================
+Timeline
+========
 
--   Work week: We will have weekly touch base meetings with the mentor(Varada Kolhatkar) and the partner (BC Stats).
+-   In work weeks, we have:
+    -   weekly touch base meetings with the mentor(Varada Kolhatkar) on Friday morning
+    -   weekly meetings on Tuesday morning with the partner (BC Stats)
 
 #### <span style="color:blue">Project Timeline</span>
 
-##### *Task 1: Coding Themes (weeks : 1-4)*
-
--   Pre-processing qualtitative data
--   Training Model
--   Preparing deliverables
-
-##### *Task 2: Linking Quantitative to Qualtitative (weeks : 1-4)*
-
--   Sentiment Analysis of qualitative data
--   Emotional Analysis of qualitative data
--   cleaning quantitative data
--   Calculating agreement between qualitative and quantitative data
--   Write report
-
-##### *Task 3: Trends Across Ministries and Overtime (weeks : 2-6)*
-
--   Creating framework for dashboard
--   Writing code for analysis
--   Stylizing and debugging dashboard
+| Task                                 | Expected number of weeks to take |
+|--------------------------------------|----------------------------------|
+| Coding Themes                        | 4                                |
+| Linking Quantitative to Qualtitative | 4                                |
+| rends Across Ministries and Overtime | 5                                |
 
 #### <span style="color:blue">Milestone Timeline</span>
 
