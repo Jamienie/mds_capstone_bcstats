@@ -3,17 +3,16 @@ BC Stats Proposal | Quantifying the Responses to Open-Ended Survey Questions
 
 ### Executive Summary
 
-The BC Public Service conducts a Work Environment Survey(WES) with the goals of understanding their employees experience, celebrating their successes and to identify areas for improvement. A great deal of work has been performed by BC stats to analyze the open ended survey responses and to model the multiple choice questions. The insights that BC stats obtain currently achieve the survey goals, however we propose to leverage current data science techniques to help automate part of the analysis and enhance the overall insight. To do this we will apply natural language processing and machine learning techniques to automate the labeling of the text responses and uncover useful sentiment. We also propose to build a dashboard to visualize and better communicate the results of the survey. We are confident that by using cutting edge data science tools and techniques we can further understand your employees experience, celebrate their successes, and identify areas for improvement.
+The BC Public Service conducts a Work Environment Survey (WES) with the goals of understanding their employees experience, celebrating their successes and to identify areas for improvement. We propose to leverage current data science techniques such as natural language processing and machine learning techniques to automate the labeling of the text responses and uncover useful sentiment. We also propose to build a dashboard to visualize and better communicate the results of the survey. We are confident that by using cutting edge data science techniques we can further understand your employees experience, celebrate their successes, and identify areas for improvement.
+
+
 
 ### Introduction
 
-The BC Public Service is committed to understanding the challenges within the workplace so they can make continuous improvements for their employees. One of the ways this is quantified is through the WES which aims to measure key drivers like job satisfaction and engagement. The results of the survey are summarized into two main reports explaining the qualitative and quantitative data at the organization, ministry and department level.
+The BC Public Service is committed to understanding the challenges and successes within the workplace. One of the ways this is quantified is through the WES which measures key drivers through qualitative data from the open-ended survey response and quantitative data from the multiple-choice questions. Currently the open-ended responses have to be manually coded into more then 60 sub-themes and to achieve this BC Stats hires summer students which takes substantial resources and time. The qualitative and quantitative data both generate their own report but there has not been an analysis looking at how this data supports each other. In the quantitive report the results are only compared to the prior survey but they have not shown how the trends vary historically.
+This project has two main objectives which is to automate qualitative labeling and to gain new insights about the survey data which have been broken into three research questions:
 
-This project has two main objectives which is to automate qualitative labeling and to gain new insights about the qualitative and quantitative data. Currently before the qualitative report can be generated the responses have to be manually coded into more than 60 sub-themes, we would like to automate this process to reduce the time and cost of generating the qualitative report. There are two new insights we will provide, the first is relating the qualitative and quantitative responses which will help the BC Public Service to understand how the qualitative and quantitative reports support each other. The second analysis will look at how the key drivers have changed over time and what factors may have contributed, this analysis will help the BC Public Service to see historic trends within their organization.
-
-The objectives have been broken into three research questions:
-
-1.  <span style="color:Darkblue">Coding Themes</span> - What is the best method to code the themes and sub-themes to the qualitative responses?
+1.  <span style="color:Darkblue">Coding Themes</span> - 1.	Which model gives the highest accuracy for classifying the themes and sub-themes of the qualitative responses?
 
 2.  <span style="color:Darkblue">Linking Quantitative to Qualitative</span> - How well does the sentiment of the qualitative responses agree with the quantitative responses?
 
@@ -21,11 +20,11 @@ The objectives have been broken into three research questions:
 
 ### Data Science Techniques
 
-Each of the three research questions require different data science techniques. Generally, the focus of question one deals with predictive statistics while questions two and three are more descriptive. For all questions our approach will utilize the quantitative or qualitative data provided by the WES. The survey has over 15,000 respondents across 26 ministries and has been conducted over 8 survey cycles starting in 2007. There are approximately 80 multiple choice questions and one open ended response question. Our approaches to the proposed questions are discussed below.
+Generally, the focus of question one deals with predictive statistics while questions two and three are more descriptive. For all questions our approach will utilize the quantitative or qualitative data provided by the WES. The survey has over 22,500 respondents across 26 ministries in 2018 and has been conducted over eight survey cycles starting in 2007. There are approximately 80 multiple choice questions and one open ended response question. Our approaches to the proposed questions are discussed below.
 
 #### <span style="color:Darkblue">Coding Themes</span>
 
-The labels to the open ended survey responses have been provided, therefore coding the themes can be described as a supervised learning problem. We will train a model to automate this task by processing the text data to be used as features in our model with the theme as our prediction target. In our initial approach we will use a bag of words analysis with a linear classifier. Building on this approach we will investigate the optimal model and pre-processing technique to increase our classification accuracy. The deliverable for this work will be a data pipeline and model that can be used to label the open ended survey questions for future cycles of the WES.
+The labels to the open-ended survey responses have been provided, therefore coding the themes can be described as a supervised learning problem. We will train a model to automate this task by processing the text data to be used as features in our model with the theme as our prediction target. In our initial approach we will use a bag of words analysis with a linear classifier. Building on this approach we will investigate the optimal model and pre-processing technique to increase our classification accuracy. The deliverable for this work will be a data pipeline and model that can be used to label the open-ended survey questions for future cycles of the WES.
 
 #### <span style="color:Darkblue">Linking Quantitative to Qualtitative</span>
 
@@ -39,10 +38,7 @@ To discover trends both through time and across departments, we will build a das
 
 ### Timeline
 
-To stay on target complete the specified tasks we have scheduled the following meetings:
-
--   weekly touch base meetings with the mentor(Varada Kolhatkar) on Friday morning
--   weekly meetings on Tuesday morning with the partner (BC Stats)
+To stay on target, complete the specified tasks we have scheduled weekly meetings on Tuesday morning with the BC Stats and Friday morning with our mentor Varada Kolhatkar.
 
 A brief outline of out milestones and deadlines are tabulated below:
 
