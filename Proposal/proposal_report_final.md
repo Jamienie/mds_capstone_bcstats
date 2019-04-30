@@ -24,11 +24,9 @@ Generally, the focus of question one deals with predictive statistics while ques
 
 The labels to the open-ended survey responses have been provided, therefore coding the themes can be described as a supervised learning problem. We will train a model to automate this task by processing the text data to be used as features in our model with the theme as our prediction target. In our initial approach we will use a bag of words analysis with a linear classifier. Building on this approach we will investigate the optimal model and pre-processing technique to increase our classification accuracy. The deliverable for this work will be a data pipeline and model that can be used to label the open-ended survey questions for future cycles of the WES.
 
-#### <span style="color:Darkblue">Linking Quantitative to Qualtitative</span>
+#### <span style="color:Darkblue">Linking Qualitative to Quantitative</span>
 
-The free form nature of the open ended survey responses offer many insights that are ripe for natural language processing. Using sentiment analysis we plan to quantify these responses and tie them to the quantitative data. Making the connection between the open ended question and the multiple choice questions is important to add support to the current survey design and validate the existing engagement model.
-
-To best answer this question we are going to investigate [inter-rater reliability metrics](https://en.wikipedia.org/wiki/Inter-rater_reliability) such as percent agreement, Cohen's Kappa, and Krippendorff's Alpha. The final deliverable for this question will be a discussion in our report.
+The free form nature of the open-ended survey responses offers many insights that are ripe for natural language processing. Using sentiment analysis, we plan to quantify these responses and tie them to the quantitative data. Making the connection between the open-ended question and the multiple-choice questions is important to add support to the current survey design and helps to reinforce the current analysis (engagement model) that is done with the quantitative data. To measure the agreement between the qualitative and quantitative data we will first look at percent agreement and then explore more complex metrics like Cohen’s Kappa (*A coefficient of agreement for nominal scales*, Cohen J). The final deliverable for this question will be a discussion in our report.
 
 #### <span style="color:Darkblue">Trends Across Ministries and Overtime</span>
 
