@@ -5,11 +5,9 @@ BC Stats Proposal | Quantifying the Responses to Open-Ended Survey Questions
 
 The BC Public Service conducts a Work Environment Survey (WES) with the goals of understanding their employees experience, celebrating their successes and to identify areas for improvement. We propose to leverage current data science techniques such as natural language processing and machine learning techniques to automate the labeling of the text responses and uncover useful sentiment. We also propose to build a dashboard to visualize and better communicate the results of the survey. We are confident that by using cutting edge data science techniques we can further understand your employees experience, celebrate their successes, and identify areas for improvement.
 
-
-
 ### Introduction
 
-The BC Public Service is committed to understanding the challenges and successes within the workplace. One of the ways this is quantified is through the WES which measures key drivers through qualitative data from the open-ended survey response and quantitative data from the multiple-choice questions. Currently the open-ended responses have to be manually coded into more then 60 sub-themes and to achieve this BC Stats hires summer students which takes substantial resources and time. The qualitative and quantitative data both generate their own report but there has not been an analysis looking at how this data supports each other. In the quantitive report the results are only compared to the prior survey but they have not shown how the trends vary historically.
+The BC Public Service is committed to understanding the challenges and successes within the workplace. One of the ways this is quantified is through the WES which measures key drivers through qualitative data from the open-ended survey response and quantitative data from the multiple-choice questions. Currently the open-ended responses have to be manually coded into more then 60 sub-themes and to achieve this BC Stats hires summer students which takes substantial resources and time. The qualitative and quantitative data are analyzed as two separate reports but currently BC stats has not investigated how each report is related to one another. In the quantitive report the results are only compared to the prior survey but they have not shown how the trends vary historically.
 This project has two main objectives which is to automate qualitative labeling and to gain new insights about the survey data which have been broken into three research questions:
 
 1.  <span style="color:Darkblue">Coding Themes</span> - 1.	Which model gives the highest accuracy for classifying the themes and sub-themes of the qualitative responses?
@@ -28,7 +26,7 @@ The labels to the open-ended survey responses have been provided, therefore codi
 
 #### <span style="color:Darkblue">Linking Quantitative to Qualtitative</span>
 
-The free form nature of the open ended survey responses offer many insights that are ripe for natural language processing. Using sentiment analysis we plan to quantify these responses and tie them to the quantitative data. Making the connection between the open ended question and the multiple choice questions is important to add support to the current survey design. Consistency across both types of questions reinforces the current analysis (engagement model) that is done with the quantitative data.
+The free form nature of the open ended survey responses offer many insights that are ripe for natural language processing. Using sentiment analysis we plan to quantify these responses and tie them to the quantitative data. Making the connection between the open ended question and the multiple choice questions is important to add support to the current survey design and validate the existing engagement model.
 
 To best answer this question we are going to investigate [inter-rater reliability metrics](https://en.wikipedia.org/wiki/Inter-rater_reliability) such as percent agreement, Cohen's Kappa, and Krippendorff's Alpha. The final deliverable for this question will be a discussion in our report.
 
@@ -38,9 +36,7 @@ To discover trends both through time and across departments, we will build a das
 
 ### Timeline
 
-To stay on target, complete the specified tasks we have scheduled weekly meetings on Tuesday morning with the BC Stats and Friday morning with our mentor Varada Kolhatkar.
-
-A brief outline of out milestones and deadlines are tabulated below:
+To stay on target we have scheduled weekly meetings on Tuesday morning with BC Stats and Friday morning with our mentor Varada Kolhatkar. A brief outline of our milestones and deadlines are tabulated below:
 
 **Table 1. Project Timeline**
 
@@ -48,9 +44,7 @@ A brief outline of out milestones and deadlines are tabulated below:
 |--------------------------------------|----------------------------------|
 | Coding Themes                        | 4                                |
 | Linking Quantitative to Qualitative  | 4                                |
-| rends Across Ministries and Overtime | 5                                |
-
-<br>
+| Trends Across Ministries and Overtime | 5                                |
 
 **Table 2. Milestone Timeline**
 
