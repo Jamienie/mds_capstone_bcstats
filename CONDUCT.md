@@ -27,9 +27,9 @@ This project will be managed using Git branching. Branches will be task oriented
 6. Then push the changes to the repository with `git push`
 7. Send a pull request from the branch to master (see Pull Request section for more details on messages, reviews and accepting)
 8. Once all work has been completed on the branch, please delete the branch promptly. There are three parts of a branch that need to be deleted.
-  -  One team member needs to delete the remote branch. It can either be deleted by hitting the garbage/trash bin button next to the branch name on the GitHub branch tab or in Bash/Terminal with the command `git push origin --delete <feature_branch_name>`
-  - Each team member will have to delete their own local branch by `git branch -d <feature_branch_name>`
-  - Each team member will have to prune the local remote connection with the command `git remote prune origin`
+    -  One team member needs to delete the remote branch. It can either be deleted by hitting the garbage/trash bin button next to the branch name on the GitHub branch tab or in Bash/Terminal with the command `git push origin --delete <feature_branch_name>`
+    - Each team member will have to delete their own local branch by `git branch -d <feature_branch_name>`
+    - Each team member will have to prune the local remote connection with the command `git remote prune origin`
 
 To check what branches are local `git branch -a`
 
