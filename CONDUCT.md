@@ -46,7 +46,7 @@ If you need to catch your branch up to the master:
 If all else fails try `git pull` & `git push` from the feature and master branch until it matches.
 
 When the error message "upstaged changes" occurs and you don't have any changes you want to push, here are two methods to discard the local difference:
- - `git stash` will "stash" your changes and can be recalled
+ - `git stash` will "stash" your changes and they can be restored
      - see all your stashed changes `git stash list`
      - restore your changes `git stash pop`
      - remove them completely `git stash drop`.
