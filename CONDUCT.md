@@ -21,40 +21,41 @@ This project will be managed using Git branching. Branches will be task oriented
 
 1. Clone the master repository to your computer locally `git clone <master_repo_URL>`
 2. Create task/feature branch of the master repository on Bash/Terminal `git branch <feature_branch_name>`
-3. Link the master and branch `git push -u origin <feature_branch_name>`
+3. Link the local and remote branch `git push -u origin <feature_branch_name>`
 4. Switch *head* to the branch `git checkout <feature_branch_name>`
 5. Work on the local repository and git add and commit the changes to the repository with `git add <file_name>` and `git commit -m"<commit_message>"`
-6. Then push the changes to the repository with `git push`
-7. Send a pull request from the branch to master (see Pull Request section for more details on messages, reviews and accepting)
-8. Once all work has been completed on the branch, please delete the branch promptly. There are three parts of a branch that need to be deleted.
-    -  One team member needs to delete the remote branch. It can either be deleted by hitting the garbage/trash bin button next to the branch name on the GitHub branch tab or in Bash/Terminal with the command `git push origin --delete <feature_branch_name>`
+6. Then push the changes to the GitHub repository with `git push`
+7. Create and send a pull request from the branch to master (see Pull Request section for more details on messages, reviews and accepting)
+8. Once all work has been completed on the branch, please delete the branch after the last pull request has been merged. There are three parts of a branch that need to be deleted.
+    -  One team member needs to delete the remote branch. It can deleted by hitting the garbage/trash bin button next to the branch name on the GitHub branch tab or in Bash/Terminal with the command `git push origin --delete <feature_branch_name>`
     - Each team member will have to delete their own local branch by `git branch -d <feature_branch_name>`
     - Each team member will have to prune the local remote connection with the command `git remote prune origin`
 
-To check what branches are local `git branch -a`
+To check your local branches `git branch -vv`
+To check all your branches `git branch -a`
 
+**Reminder to not push .Rhistory or .ipynb check points**
 
-**Reminder to not push .Rhistory or .ipyn check points**
 
 #### How to Update your Branch
 
-1. When your branch is behind, check which branch you are in, then do `git pull`
+When your branch is behind do `git pull` to catch up.
 
-2. If you need your branch to match up with the master branch. Checkout the master branch, do a git pull, then checkout your feature branch and do `git merge master`
+If you need to catch your branch up to the master:
+ - switch to your master branch `git checkout master` and update `git pull`
+ - then switch to your feature branch and combine with master `git merge master`
 
-3. If the files you want aren't there locally, try pushing and pulling from the master and the branch and maybe a git merge and then push and pull again
-
-4. When your are trying to git pull and the error message about upstaged changes occurs. There are two methods that are essentially equivalent
- - `git stash` will "stash" your changes and you can restore with `git stash pop` or remove completely with `git stash drop`.
- - `git reset --hard`
-
+When the error message "upstaged changes" occurs and you don't have any changes you want to push, here are two methods to discard the local difference:
+ - `git stash` will "stash" your changes. See all your stashed changes with `git stash list` where you can restore them `git stash pop` or remove completely `git stash drop`.
+ - `git reset --hard` will reset all of your changes to the previous commit
 
 
 ### Communication
-To ensure open and transparent communication create an issue in the master repository. When there are task oriented issues, before working on the task add a comment assigning the task to yourself.
-If you see a bug or typo either create an issue so the teammate responsible for the file is aware or fix the issue yourself and send a pull request.
 
-For more general communication such as organizing meetings our Slack channel will be used.
+To ensure open and transparent communication team members will use issues to convey messages about action items, deadlines, meeting agendas, resources, bugs and any other relevant items. For more general communication such as organizing meetings our Slack channel will be used.
+
+When there are task oriented issues, before working on the task add a comment assigning the task to yourself. If you see a bug or typo either create an issue so the team member responsible for the file is aware or fix the issue yourself and send a pull request.
+
 
 ### Commit Messages
 When adding new files or making changes to existing files, write simple and descriptive commit messages. For readability have:
@@ -63,11 +64,10 @@ When adding new files or making changes to existing files, write simple and desc
 - the changes in the file is being updated
 
 ### Pull Request Messages & Review
-Once a pull request has been create assign the other team members as reviewers. For major or critical updates/tasks try to have both other team mates post a review before the pull request is accepted.
-
-Any team member can accept a pull request, ie not just the team member who made the request can accept the pull request.
-
-Smaller administrative tasks like changing folder names or creating a template can be accepted with out other teammates reviews.
+Once a pull request has been created assign the other team members as reviewers. Any team member can accept a pull request, ie either the creator or team members.
+- Major/critical/final updates should have two other team members approval or reviews before the pull request is accepted
+   - due to schedules or deadlines this can be waved 
+- Smaller administrative tasks (ie. changing folder names) can be accepted without other team members review
 
 
 ### Outside & Future Contributors
