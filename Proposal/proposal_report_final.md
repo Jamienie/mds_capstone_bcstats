@@ -4,7 +4,7 @@ Aaron Quinton, Ayla Pearson, Fan Nie
 
 ### Executive Summary
 
-The BC Public Service conducts a Work Environment Survey (WES) with the goals of understanding their employees' experience, celebrating their successes and to identifying areas for improvement. We propose to leverage current data science techniques such as natural language processing and machine learning to automate the labeling of the text responses and uncover useful sentiment. We also propose to build a dashboard to visualize and better communicate the results of the survey. We are confident that by using cutting edge data science techniques we can further understand your employees' experience, celebrate their successes, and identifying areas for improvement.
+The BC Public Service conducts a Work Environment Survey (WES) with the goals of understanding their employees' experience, celebrating their successes and identifying their areas for improvement. We propose to leverage current data science techniques such as natural language processing and machine learning to automate the labeling of the text responses and uncover useful sentiment. We also propose to build a dashboard to visualize and better communicate the results of the survey. We are confident that by using data science we can further understand your employees' experience, celebrate their successes, and identify areas for improvement.
 
 ### Introduction
 
@@ -37,7 +37,7 @@ To discover trends both through time and across departments, we will build a das
 
 To stay on target we have scheduled weekly meetings on Tuesday morning with BC Stats and Friday morning with our mentor Varada Kolhatkar. A brief outline of our milestones and deadlines are tabulated below:
 
-**Table 1. Project Timeline**
+**Table 1. Project Timeline**  
 
 | Task                                 | Expected number of weeks to take |
 |--------------------------------------|----------------------------------|
@@ -45,7 +45,7 @@ To stay on target we have scheduled weekly meetings on Tuesday morning with BC S
 | Linking Quantitative to Qualitative  | 5                                |
 | Trends Across Ministries and Overtime | 5                               |
 
-**Table 2. Milestone Timeline**
+**Table 2. Milestone Timeline**  
 
 | Milestone          | Submission Due date                        |
 |--------------------|--------------------------------------------|
