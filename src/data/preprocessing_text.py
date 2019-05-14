@@ -7,6 +7,8 @@ from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 
+###############################################################################
+
 def replace_contractions(text):
     """Replace contractions in string of text"""
     return contractions.fix(text)
@@ -90,3 +92,18 @@ def lemmatize_verbs(words):
         lemma = lemmatizer.lemmatize(word, pos='v')
         lemmas.append(lemma)
     return lemmas
+
+def preprocess_text(text):
+    text = replace_contractions(text)
+    text = to_lowercase(text)
+    words = word_tokenize(text)
+    words = remove_non_ascii(words)
+    words = reduce_lengthening(words)
+    words = correct_spelling(words)
+    words = remove_punctuation(words)
+    words = replace_numbers(words)
+    words = remove_stopwords(words)
+    words = stem_words(words)
+    words = lemmatize_verbs(words)
+    text = ' '.join(words)
+    return text
