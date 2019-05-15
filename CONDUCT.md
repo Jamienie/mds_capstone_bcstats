@@ -75,6 +75,15 @@ Once a pull request has been created assign the other team members as reviewers.
 *Reminder do not push .Rhistory or .ipynb check points*
 <br>
 
+
+### Project Organization
+This project will follow the project structure adopted from [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/). Raw data should never be pushed to GitHub due to privacy concerns and this folder is listed in the .gitignore file.
+
+Notebooks and scrips should be named appropriately so the purpose can be clearly understood, naming conventions may be created for consistency. Reports should not be named "final" or similar terms as only the final version should be present and GitHub should be used for version control. Notebooks are for experiments which includes both Jupyter Notebooks and .Rmd files, due to version control issue Jupyer Notebook will be used for individual work instead of collaboration.
+
+If you are unsure of where your file should be stored consult with the team. Large organization changes should be discussed between the team before implemented. Try to structure your code in modules and call those functions within your notebook.
+
+
 ### Outside & Future Contributors
 This repository has been created for a course project and may not be monitored after the course. If you would like to comment or ask questions about the analysis, post an issue and one of the contributors may respond.
 
