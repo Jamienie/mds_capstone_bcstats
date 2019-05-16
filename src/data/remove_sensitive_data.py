@@ -10,8 +10,8 @@ filepath_2015 = "data/raw/WES2015_Final_Qual_Results.xlsx"
 filepath_2018 = "data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
 
 # File Paths to Write the train and test .csv
-filepath_2015 = "data/interim/desensitized_qualitative-data2015.csv"
-filepath_2018 = "data/interim/desensitized_qualitative-data2018.csv"
+filepath_out_2015 = "data/interim/desensitized_qualitative-data2015.csv"
+filepath_out_2018 = "data/interim/desensitized_qualitative-data2018.csv"
 
 
 ###############################################################################
@@ -38,6 +38,6 @@ df_raw_2018 = df_raw_2018.drop(index=index2018)
 
 # Write raw train and test dataframes to csv with the sensitive rows removed
 # 2015
-df_raw_2015.to_csv(filepath_2015)
+df_raw_2015.to_csv(filepath_out_2015)
 # 2018
-df_raw_2018.to_csv(filepath_2018)
+df_raw_2018.to_csv(filepath_out_2018)
