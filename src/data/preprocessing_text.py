@@ -1,32 +1,49 @@
-import re, string, unicodedata
-import nltk
+# preprocessing_text.py
+# Authors: Aaron Quinton
+# Date: 2019-05-15
+
+# Many functions and the overall workflow have been built from a KDnuggets Blog
+# written by Matthew Mayo:
+# https://www.kdnuggets.com/2018/03/text-data-preprocessing-walkthrough-python.html
+
+
+# Import modules
+import re
+import unicodedata
 import contractions
 import inflect
 from pattern.en import suggest
-from nltk import word_tokenize, sent_tokenize
+from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 
+
+###############################################################################
+# Define specific preprocessing tasks as individual funtions to be combined   #
 ###############################################################################
 
 def replace_contractions(text):
     """Replace contractions in string of text"""
     return contractions.fix(text)
 
+
 def to_lowercase(text):
     """Convert all characters in a string to lowercase"""
     return text.lower()
+
 
 def remove_non_ascii(words):
     """Remove non-ASCII characters from list of tokenized words"""
     new_words = []
     for word in words:
-        new_word = unicodedata.normalize('NFKD', word).encode('ascii', 'ignore').decode('utf-8', 'ignore')
+        new_word = unicodedata.normalize('NFKD', word)
+        new_word = new_word.encode('ascii', 'ignore').decode('utf-8', 'ignore')
         new_words.append(new_word)
     return new_words
 
+
 def reduce_lengthening(words):
-    """Reduce greater than 2 repeating characters in a word from list of tokenized words"""
+    """Reduce greater than 2 repeating characters in a word"""
     new_words = []
     for word in words:
         pattern = re.compile(r"(.)\1{2,}")
@@ -34,8 +51,9 @@ def reduce_lengthening(words):
         new_words.append(new_word)
     return new_words
 
+
 def correct_spelling(words):
-    """Replace all misspelled tokenized words in a list with the correct spelling"""
+    """Correct all misspelled tokenized words in a list"""
     new_words = []
     for word in words:
         suggested_word = suggest(word)
@@ -46,6 +64,7 @@ def correct_spelling(words):
         new_words.append(new_word)
     return new_words
 
+
 def remove_punctuation(words):
     """Remove punctuation from list of tokenized words"""
     new_words = []
@@ -55,8 +74,10 @@ def remove_punctuation(words):
             new_words.append(new_word)
     return new_words
 
+
 def replace_numbers(words):
-    """Replace all interger occurrences in list of tokenized words with textual representation"""
+    """Replace all interger occurrences in list of tokenized words with textual
+    representation"""
     p = inflect.engine()
     new_words = []
     for word in words:
@@ -67,6 +88,7 @@ def replace_numbers(words):
             new_words.append(word)
     return new_words
 
+
 def remove_stopwords(words):
     """Remove stop words from list of tokenized words"""
     new_words = []
@@ -74,6 +96,7 @@ def remove_stopwords(words):
         if word not in stopwords.words('english'):
             new_words.append(word)
     return new_words
+
 
 def stem_words(words):
     """Stem words in list of tokenized words"""
@@ -84,6 +107,7 @@ def stem_words(words):
         stems.append(stem)
     return stems
 
+
 def lemmatize_verbs(words):
     """Lemmatize verbs in list of tokenized words"""
     lemmatizer = WordNetLemmatizer()
@@ -92,6 +116,11 @@ def lemmatize_verbs(words):
         lemma = lemmatizer.lemmatize(word, pos='v')
         lemmas.append(lemma)
     return lemmas
+
+
+###############################################################################
+# Combine preprocessing functions for overall
+###############################################################################
 
 def preprocess_text(text):
     text = replace_contractions(text)
