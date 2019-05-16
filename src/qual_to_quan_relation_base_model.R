@@ -15,7 +15,7 @@ library(readxl)
 # csv sub set
 
 # load quantitive data
-quan_data <- "../Data/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
+quan_data <- "../data/raw/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
 quant <- read_csv(quan_data)
 
 # remove 18 weird rows that appeared when it was converted to csv
@@ -26,7 +26,7 @@ quant <- quant %>%
 
 
 # load qualitative data
-qual_data <- "../Data/2018 WES Qual Coded - Final Comments and Codes for Martin Capstone_sample.xlsx"
+qual_data <- "../data/raw/2018 WES Qual Coded - Final Comments and Codes for Martin Capstone_sample.xlsx"
 qual <- read_excel(qual_data, sheet = "Comments", skip = 1)
 
 
@@ -39,8 +39,7 @@ qual <- read_excel(qual_data, sheet = "Comments", skip = 1)
 # subset required columns, rename and filter out people who only had positive 
 #comments
 qual <- qual %>% 
-  select(`_telkey`, `Code 1`, `Code 2`, `Code 3`, `Code 4`, `Code 5`) %>% 
-  rename(USERID = `_telkey`,
+  select(USERID = `_telkey`,
          code1 = `Code 1`,
          code2 = `Code 2`,
          code3 = `Code 3`,
@@ -71,19 +70,14 @@ theme_levels = c("Career & Personal Development",   #1
 # add main themes label from subtheme code
 qual <- qual %>% 
   drop_na(code) %>% 
-  filter(code != 99) %>% 
-  filter(code != 121) %>% 
-  filter(code != 123) %>% 
-  filter(code != 122) %>% 
+  filter(!code %in% c(99, 121, 123, 122)) %>% 
   mutate(qual_value = -1) %>% 
   mutate(main_theme = str_sub(code, start = 1, end = str_length(code)-1)) %>% 
   mutate(main_theme = factor(as.double(main_theme), labels = theme_levels)) %>% 
   select(USERID, code_num, code, main_theme, qual_value)
 
 
-
-
-
+# need to look into creating some kind of unit test file
 # filter condition to double check process is working correctly
 person1 = "172541-914038"  # 4 separate codes, all should appear = 4
 person2 = "173108-219388"  # only has code 122, should NOT appear = 0
@@ -92,22 +86,15 @@ person4 = "190199-111388"  # only has comment 99, should NOT appear =0
 person5 = "180129-727518"  # has 4 codes, one being 123, so only 3 should appear =3
 # there should only be 8 codes present in the output
 
-# should create a test file or something 
-# needs to be evaluated before doing unique 
+# needs to be evaluated before doing unique (see code below)
 qual %>% 
-  filter(USERID == person1 | 
-           USERID == person2 | 
-           USERID == person3 | 
-           USERID == person4 | 
-           USERID == person5) %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
   arrange(USERID)
-
 
 # remove duplications from converting from sub-theme to main theme 
 qual_data <- qual %>% 
   select(USERID, main_theme, qual_value) %>% 
   unique()
-
 
 
 ###############################################################################
@@ -148,12 +135,14 @@ quant_data <- quant_summary %>%
     quan_value = case_when(
       score < 40              ~ -1,
       score > 40 & score < 60 ~  0,
-      score > 60              ~  1
+      score > 60              ~  1,
+      TRUE                    ~ 99
     )
   ) %>% 
   select(USERID, theme, quan_value) %>% 
   drop_na(quan_value) %>% 
   mutate(theme = factor(theme))
+
 
 
 ###############################################################################
