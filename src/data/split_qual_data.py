@@ -17,10 +17,10 @@ output_path_train_2015 = "data/interim/train_2015-qualitative-data.csv"
 output_path_train_2018 = "data/interim/train_2018-qualitative-data.csv"
 
 # reading in 2015 qualitative data
-df_raw_2015 = pd.read_excel(input_path_2015)
+df_raw_2015 = pd.read_csv(input_path_2015)
 
 # reading in 2018 qualitative data
-df_raw_2018 = pd.read_excel(input_path_2018,skiprows = 1)
+df_raw_2018 = pd.read_csv(input_path_2018,skiprows = 1)
 
 # Put 10% of the data aside for testing and the remaining 90% for training
 df_test_2018 = df_raw_2018.sample(frac = 0.1, random_state = 2019)
