@@ -1,32 +1,42 @@
-# tidy_quantitative-data.R 
+# tidy_quantitative_data.R 
 # Author: Aaron Quinton
 # Date: 2019-05-08
+
+# Tidy's the raw quanititative data into two csv files, one with the scores
+# on the multiple choice questions and engagement model, the second details
+# the demographic and other employee info
 
 # Require pkgs `foreign`, `sjlabelled`, and `tidyverse`
 library(tidyverse)
 
+# File input paths
+filepath_spss = "./data/raw/WES 2007-2018 LONGITUDINAL DATA_short.sav"
+filepath_legend = "./references/data-dictionaries/survey_mc_legend.csv"
 
+# File output paths
+filepath_out_questions = "./data/processed/tidy_quant_questions.csv"
+filepath_out_info = "./data/processed/tidy_quant_demographics.csv"
+
+  
 ###############################################################################
 # Read quantitative data from SPSS file and read in legend to help select and #
 # rename columns                                                              #
 ###############################################################################
 
 # Removes labels from spss file for the multiple choice question data
-df_spss <- foreign::read.spss(file = 
-                           "./data/WES 2007-2018 LONGITUDINAL DATA_short.sav", 
-                               to.data.frame = TRUE, 
-                               use.value.labels = FALSE) %>% 
+df_spss <- foreign::read.spss(file = filepath_spss, 
+                              to.data.frame = TRUE, 
+                              use.value.labels = FALSE) %>% 
            sjlabelled::remove_all_labels()
 
 # Keeps the labels from spss file for the employee info and demographic data
-df_spss_labeled <- foreign::read.spss(file = 
-                           "./data/WES 2007-2018 LONGITUDINAL DATA_short.sav", 
+df_spss_labeled <- foreign::read.spss(file = filepath_spss, 
                                       to.data.frame = TRUE, 
                                       use.value.labels = TRUE)
 
 # the csv used has been manually built to help make sense of all the columns in
 # the spss file
-df_legend <- read_csv("./data/survey_mc_legend.csv")
+df_legend <- read_csv(filepath_legend)
 
 
 ###############################################################################
@@ -112,21 +122,10 @@ df_info <- df_info %>%
 # Work needs to be done to clean Organization inconsistencies, LEVEL1_NAME,
 # LEVEL2_NAME, WESJOBCLASGRP etc.
 
-df_orgs <- df_info %>% 
-  select(USERID, survey_year, ORGANIZATION) %>% 
-  mutate(ORGANIZATION = ifelse(str_detect(ORGANIZATION, "."), ORGANIZATION, NA), 
-         ORGANIZATION = factor(ORGANIZATION)) %>% 
-  left_join(select(filter(df_ORG2018, str_detect(ORGANIZATION, ".")),
-                   -survey_year), by = "USERID") %>% 
-  filter(!is.na(ORGANIZATION.x), !is.na(ORGANIZATION.y)) %>% 
-  rename(ORG2018 = ORGANIZATION.y, ORG = ORGANIZATION.x)
 
-p <- df_orgs %>% 
-  filter(ORG2018 == "Advanced Education, Skills and Training") %>% 
-  mutate(ORG2 = fct_drop(ORG)) %>% 
-  ggplot(aes(x = survey_year, y = ORG2, group = USERID)) +
-    geom_path(alpha = 0.1) +
-    theme_bw()
+###############################################################################
+# Write quantitative data files to csv                                        #
+###############################################################################
 
-p
-
+write.csv(df_questions, filepath_out_questions)
+write.csv(df_info, filepath_out_info)
