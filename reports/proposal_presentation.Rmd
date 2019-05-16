@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = FALSE)
 <br>  
 <br>  
   
-  <img src="./imgs/WES_report.png" alt="drawing" width="300"/>
+  <img src="./figures/WES_report.png" alt="drawing" width="300"/>
 </div>
 
 
@@ -54,7 +54,7 @@ Examples:
 ## Introduction | <span style="color:Darkblue">Quantitative Data</span>  
 
 <div class="columns-2">
-  <img src="./imgs/engagement_model.png" alt="drawing" width="350"/>
+  <img src="./figures/engagement_model.png" alt="drawing" width="350"/>
   
   The current quantitative analysis report includes: 
   
@@ -91,7 +91,7 @@ The current qualitative analysis report includes:
 
 ## Introduction | <span style="color:Darkblue">Qualitative Data</span>   
 <div class="centered">
-  <img src="./imgs/comment_plot.png" alt="drawing" width="600"/>
+  <img src="./figures/comment_plot.png" alt="drawing" width="600"/>
 </div>
 
 
@@ -171,7 +171,7 @@ Inter-rater reliability Metrics:
 
 ## Timeline  
 
-<img src="./imgs/timeline.png" alt="drawing" width="800"/>
+<img src="./figures/timeline.png" alt="drawing" width="800"/>
 
 ```{r timeline, include=FALSE}
 library(timevis)
