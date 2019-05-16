@@ -2,9 +2,10 @@
 # Author: Ayla Pearson
 # Date: 2019-05-10
 
-# Require pkgs `tidyverse` and `readxl`
+# Require pkgs `tidyverse`, `readxl` and `testthat`
 library(tidyverse)
 library(readxl)
+library(testthat)
 
 
 ###############################################################################
@@ -15,7 +16,7 @@ library(readxl)
 # csv sub set
 
 # load quantitive data
-quan_data <- "../data/raw/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
+quan_data <- "./data/raw/old/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
 quant <- read_csv(quan_data)
 
 # remove 18 weird rows that appeared when it was converted to csv
@@ -26,8 +27,8 @@ quant <- quant %>%
 
 
 # load qualitative data
-qual_data <- "../data/raw/2018 WES Qual Coded - Final Comments and Codes for Martin Capstone_sample.xlsx"
-qual <- read_excel(qual_data, sheet = "Comments", skip = 1)
+path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
+qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
 
 
 
@@ -76,20 +77,24 @@ qual <- qual %>%
   mutate(main_theme = factor(as.double(main_theme), labels = theme_levels)) %>% 
   select(USERID, code_num, code, main_theme, qual_value)
 
-
-# need to look into creating some kind of unit test file
-# filter condition to double check process is working correctly
+# basic unit test to confirm filtering is working as expected
+# if it does not correctly evaluate it will throw error message and stop
 person1 = "172541-914038"  # 4 separate codes, all should appear = 4
 person2 = "173108-219388"  # only has code 122, should NOT appear = 0
 person3 = "173924-784228"  # has code 122 and 93, only code 93 should appear =1
 person4 = "190199-111388"  # only has comment 99, should NOT appear =0
 person5 = "180129-727518"  # has 4 codes, one being 123, so only 3 should appear =3
-# there should only be 8 codes present in the output
 
-# needs to be evaluated before doing unique (see code below)
-qual %>% 
+test1 <- qual %>% 
   filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
   arrange(USERID)
+
+test_that("test that test1 has 8 rows", {
+  expect_equal(nrow(test1), 8)
+})
+
+
+
 
 # remove duplications from converting from sub-theme to main theme 
 qual_data <- qual %>% 
