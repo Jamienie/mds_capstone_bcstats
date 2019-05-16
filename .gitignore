@@ -3,3 +3,5 @@
 .nbgrader.log
 Proposal/.Rhistory
 /data
+references/data-dictionaries/NationalNames.csv
+src/data/__pycache__/
