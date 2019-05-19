@@ -3,7 +3,7 @@
 # Date: 2019-05-19
 
 import pandas as pd
-from src.data import sensitive_text
+import sensitive_text
 
 # File paths to Read the Qualitative Data
 filepath_2015 = "data/raw/WES2015_Final_Qual_Results.xlsx"
