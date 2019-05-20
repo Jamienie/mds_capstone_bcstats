@@ -12,18 +12,22 @@ library(testthat)
 # Load the quantitative and qualitative data                                  #
 ###############################################################################
 
+## remove all when tidy quant reads in correctly
 # this will need to be updated to the full spss format, currently reading in
 # csv sub set
-
 # load quantitive data
-quan_data <- "./data/raw/old/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
-quant <- read_csv(quan_data)
+#quan_data <- "./data/raw/old/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
+#quant <- read_csv(quan_data)
+#quant <- quant %>% 
+#  filter(USERID != "Policy") %>% 
+#  filter(!grepl("^EP", USERID))
+######
 
-# remove 18 weird rows that appeared when it was converted to csv
-# this may not need to be done on real data set
-quant <- quant %>% 
-  filter(USERID != "Policy") %>% 
-  filter(!grepl("^EP", USERID))
+path_quant <- "./data/processed/tidy_quant_questions.csv"
+#path_quant <- "./data/raw/old/WES 2007-2018 LONGITUDINAL DATA_sample.csv"
+
+quant <- read_csv(path_quant)
+
 
 
 # load qualitative data
@@ -75,10 +79,10 @@ qual <- qual %>%
   mutate(qual_value = -1) %>% 
   mutate(main_theme = str_sub(code, start = 1, end = str_length(code)-1)) %>% 
   mutate(main_theme = factor(as.double(main_theme), labels = theme_levels)) %>% 
-  select(USERID, code_num, code, main_theme, qual_value)
+  select(USERID, main_theme, qual_value)
 
-# basic unit test to confirm filtering is working as expected
-# if it does not correctly evaluate it will throw error message and stop
+# confirm filtering is working as expected
+# if not working code will stop here 
 person1 = "172541-914038"  # 4 separate codes, all should appear = 4
 person2 = "173108-219388"  # only has code 122, should NOT appear = 0
 person3 = "173924-784228"  # has code 122 and 93, only code 93 should appear =1
@@ -94,12 +98,18 @@ test_that("test that test1 has 8 rows", {
 })
 
 
-
-
 # remove duplications from converting from sub-theme to main theme 
 qual_data <- qual %>% 
-  select(USERID, main_theme, qual_value) %>% 
   unique()
+
+
+test2 <- qual_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  arrange(USERID)
+
+test_that("test that test2 has 5 rows", {
+  expect_equal(nrow(test2), 5)
+})
 
 
 ###############################################################################
@@ -107,41 +117,18 @@ qual_data <- qual %>%
 ###############################################################################
 
 
-# manual list of names of key drivers for 2018
-quan_col_names = c(
-  "Engagement_18",
-  "Commitment_18",
-  "Job_Satisfaction_18",
-  "Org_Satisfaction_18",
-  "Empowerment_18",
-  "Stress_Workload_18",
-  "Vision_Mission_Goals_18",
-  "Teamwork_18",
-  "Recognition_18",
-  "Professional_Development_18",
-  "Pay_Benefits_18",
-  "Staffing_Practices_18",
-  "Respectful_Environment_18",
-  "Executive_Level_18",
-  "Supervisory_Level_18",
-  "Job_Suitability_18",
-  "Tools_Workspace_18")
-
-# select the 2018 questions and key drivers
-quant_summary <- quant %>% 
-  select(USERID, quan_col_names )
-
 # turn the quantitative data into a tidy form for comparison 
 # converts the 100 value average scores to neg(-1), neutral(0) and pos(+1)
-quant_data <- quant_summary %>% 
-  select(USERID, quan_col_names) %>% 
+quant_data <- quant %>% 
+  filter(survey_year==2018) %>% 
+  select(USERID, quan_col_names ) %>% 
   gather(key = "theme", value="score", quan_col_names) %>% 
   mutate(
     quan_value = case_when(
       score < 40              ~ -1,
       score > 40 & score < 60 ~  0,
       score > 60              ~  1,
-      TRUE                    ~ 99
+      TRUE                    ~ NA_real_
     )
   ) %>% 
   select(USERID, theme, quan_value) %>% 
@@ -149,6 +136,16 @@ quant_data <- quant_summary %>%
   mutate(theme = factor(theme))
 
 
+test3 <- quant_data %>% 
+  filter(USERID %in% c(person1, person3)) %>% 
+  arrange(USERID)
+
+test_that("conversion from 100 point scale to pos, neg, neutral", {
+  expect_equal(test3[[3]][[1]],   1)
+  expect_equal(test3[[3]][[18]],  0)
+  expect_equal(test3[[3]][[26]], -1)
+  expect_equal(nrow(test3), 32)
+  })
 
 ###############################################################################
 # Compare qual and quant                                                      #
@@ -156,21 +153,22 @@ quant_data <- quant_summary %>%
 
 
 # change factor level names in the qual data to match quant data
-new_vect    = c( "Professional_Development_18",     #1
-                 "Pay_Benefits_18",                 #2
-                 "Engagement_18",                   #3
-                 "Executive_Level_18",              #4
-                 "Job_Suitability_18",              #5
-                 "Staffing_Practices_18",           #6
-                 "Recognition_18",                  #7
-                 "Supervisory_Level_18",            #8
-                 "Stress_Workload_18",              #9
-                 "Tools_Workspace_18",              #10
-                 "Vision_Mission_Goals_18")         #11
+new_vect    = c( "Professional_Development",     #1
+                 "Pay_Benefits",                 #2
+                 "Engagement",                   #3
+                 "Executive_Level",              #4
+                 "Job_Suitability",              #5
+                 "Staffing_Practices",           #6
+                 "Recognition",                  #7
+                 "Supervisory_Level",            #8
+                 "Stress_Workload",              #9
+                 "Tools_Workspace",              #10
+                 "Vision_Mission_Goals")         #11
 
 new_qual <- qual_data %>% 
   mutate(theme = factor(main_theme, labels = new_vect)) %>% 
   select(USERID, theme, qual_value)
+
 
 # left join on the qual data (since we are matching qual to quant)
 joined_data <- left_join(new_qual, quant_data, by=c("USERID", "theme")) %>% 
@@ -178,21 +176,14 @@ joined_data <- left_join(new_qual, quant_data, by=c("USERID", "theme")) %>%
   mutate(diff = quan_value - qual_value) 
 
 
-# this needs to be moved to a test file 
-# check that left join did what was expected
-# looks like everything joined corrected
-joined_data %>% 
-  filter(USERID == person1)  
-# look at qual and quan separetly for person 1
-# this confirms that join did what was expected
-new_qual %>% 
-  filter(USERID == person1)
-quant_data %>% 
-  filter(USERID == person1)
+test4 <- joined_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5))  
+
+test_that("number of rows should match unique qual data", {
+  expect_equal(nrow(test4), nrow(test2))
+})
 
 
-# diff of 0 means they match
-# diff of 2 means they are most different 
 
 # counts overall 
 joined_data %>%
