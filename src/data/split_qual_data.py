@@ -4,7 +4,6 @@
 # This script file is for splitting the comment datasets into a train and test
 # to ensure dataset test data is untouched during our analysis
 
-
 import pandas as pd
 
 # file paths to read the qualitative data
@@ -16,6 +15,11 @@ output_path_test_2015 = "data/interim/test_2015-qualitative-data.csv"
 output_path_test_2018 = "data/interim/test_2018-qualitative-data.csv"
 output_path_train_2015 = "data/interim/train_2015-qualitative-data.csv"
 output_path_train_2018 = "data/interim/train_2018-qualitative-data.csv"
+
+
+###############################################################################
+# Read in 2015 and 2018 desensitized qualitative data. Split for test/train   #
+###############################################################################
 
 # Read in qualitative data
 # 2015
