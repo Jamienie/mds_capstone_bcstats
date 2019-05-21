@@ -5,3 +5,4 @@ Proposal/.Rhistory
 /data
 references/data-dictionaries/NationalNames.csv
 src/data/__pycache__/
+src/models/__pycache__/
