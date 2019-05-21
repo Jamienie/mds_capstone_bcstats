@@ -1,0 +1,318 @@
+---
+title: "Qualitative to Quantitative Base Model"
+author: "Aaron Quinton, Ayla Pearson, Fan Nie"
+date: "June 2019"
+output: 
+  pdf_document
+---
+
+
+
+```{r setup, echo=FALSE, include=FALSE, message=FALSE}
+# Require pkgs `tidyverse`, `readxl`, `testthat` and `knitr`
+library(tidyverse)
+library(readxl)
+library(testthat)
+
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+```
+
+
+
+```{r load data, echo=FALSE}
+# load quantitative data
+path_quant <- "./data/processed/tidy_quant_questions.csv"
+quant <- read_csv(path_quant)
+# load qualitative data
+path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
+qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
+```
+
+
+
+
+```{r clean and wrangle qualitative data, include=FALSE}
+# subset required columns, rename and filter out people who only had positive 
+#comments
+qual <- qual %>% 
+  select(USERID = `_telkey`,
+         code1 = `Code 1`,
+         code2 = `Code 2`,
+         code3 = `Code 3`,
+         code4 = `Code 4`,
+         code5 = `Code 5`) %>% 
+  filter(!(code1 == 122 & is.na(code2))) 
+
+
+# re-organize data into tidy form
+qual <- gather(qual, key= "code_num", value="code", code1, code2, code3, code4, code5)
+
+
+# main theme labels
+theme_levels = c("Career & Personal Development",   #1
+                 "Compensation & Benefits",         #2
+                 "Engagement & Workplace Culture",  #3
+                 "Executives",                      #4
+                 "Flexible Work Environment",       #5
+                 "Staffing Practices",              #6
+                 "Recognition & Empowerment",       #7
+                 "Supervisor",                      #8
+                 "Stress & Workload",               #9
+                 "Tools, Equipt & Physical Envir",  #10
+                 "Vision, Mission & Goals")         #11
+
+
+# remove other theme and unrelated comments, create negative rating, and
+# add main themes label from subtheme code
+qual <- qual %>% 
+  drop_na(code) %>% 
+  filter(!code %in% c(99, 121, 123, 122)) %>% 
+  mutate(qual_value = -1) %>% 
+  mutate(main_theme = str_sub(code, start = 1, end = str_length(code)-1)) %>% 
+  mutate(main_theme = factor(as.double(main_theme), labels = theme_levels)) %>% 
+  select(USERID, main_theme, qual_value)
+
+# confirm filtering is working as expected
+# if not working code will stop here 
+person1 = "172541-914038"  # 4 separate codes, all should appear = 4
+person2 = "173108-219388"  # only has code 122, should NOT appear = 0
+person3 = "173924-784228"  # has code 122 and 93, only code 93 should appear =1
+person4 = "190199-111388"  # only has comment 99, should NOT appear =0
+person5 = "180129-727518"  # has 4 codes, one being 123, so only 3 should appear =3
+
+test1 <- qual %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  arrange(USERID)
+
+test_that("test that test1 has 8 rows", {
+  expect_equal(nrow(test1), 8)
+})
+
+
+# remove duplications from converting from sub-theme to main theme 
+qual_data <- qual %>% 
+  unique()
+
+
+test2 <- qual_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  arrange(USERID)
+
+test_that("test that test2 has 5 rows", {
+  expect_equal(nrow(test2), 5)
+})
+
+```
+
+
+```{r clean and wrangle quantitative data, echo=FALSE, include=FALSE}
+
+# manual list of names of key drivers for 2018
+quan_col_names = c(
+  "Engagement",
+  "Commitment",
+  "Job_Satisfaction",
+  "Org_Satisfaction",
+  "Empowerment",
+  "Stress_Workload",
+  "Vision_Mission_Goals",
+  "Teamwork",
+  "Recognition",
+  "Professional_Development",
+  "Pay_Benefits",
+  "Staffing_Practices",
+  "Respectful_Environment",
+  "Executive_Level",
+  "Supervisory_Level",
+  "Job_Suitability",
+  "Tools_Workspace")
+
+
+# turn the quantitative data into a tidy form for comparison 
+# converts the 100 value average scores to neg(-1), neutral(0) and pos(+1)
+quant_data <- quant %>% 
+  filter(survey_year==2018) %>% 
+  select(USERID, quan_col_names ) %>% 
+  gather(key = "theme", value="score", quan_col_names) %>% 
+  mutate(
+    quan_value = case_when(
+      score < 40              ~ -1,
+      score > 40 & score < 60 ~  0,
+      score > 60              ~  1,
+      TRUE                    ~ NA_real_
+    )
+  ) %>% 
+  select(USERID, theme, quan_value) %>% 
+  drop_na(quan_value) %>% 
+  mutate(theme = factor(theme))
+
+
+test3 <- quant_data %>% 
+  filter(USERID %in% c(person1, person3)) %>% 
+  arrange(USERID)
+
+test_that("conversion from 100 point scale to pos, neg, neutral", {
+  expect_equal(test3[[3]][[1]],   1)
+  expect_equal(test3[[3]][[18]],  0)
+  expect_equal(test3[[3]][[26]], -1)
+  expect_equal(nrow(test3), 32)
+  })
+```
+
+
+```{r Compare qual and quant, include=FALSE}
+
+# change factor level names in the qual data to match quant data
+new_vect    = c( "Professional_Development",     #1
+                 "Pay_Benefits",                 #2
+                 "Engagement",                   #3
+                 "Executive_Level",              #4
+                 "Job_Suitability",              #5
+                 "Staffing_Practices",           #6
+                 "Recognition",                  #7
+                 "Supervisory_Level",            #8
+                 "Stress_Workload",              #9
+                 "Tools_Workspace",              #10
+                 "Vision_Mission_Goals")         #11
+
+new_qual <- qual_data %>% 
+  mutate(theme = factor(main_theme, labels = new_vect)) %>% 
+  select(USERID, theme, qual_value)
+
+
+# left join on the qual data (since we are matching qual to quant)
+joined_data <- left_join(new_qual, quant_data, by=c("USERID", "theme")) %>% 
+  drop_na(quan_value) %>% 
+  mutate(diff = quan_value - qual_value) 
+
+
+test4 <- joined_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5))  
+
+test_that("number of rows should match unique qual data", {
+  expect_equal(nrow(test4), nrow(test2))
+})
+
+theme_counts <- joined_data %>% 
+  mutate(theme = str_replace_all(theme, "_", " ")) %>% 
+  group_by(theme, diff) %>% 
+  summarize(n = n()) %>% 
+  arrange(diff, desc(n)) %>% 
+  rename("Difference" = diff,
+         "Main Theme" = theme)
+
+```
+
+
+
+```{r overall summary,  echo=FALSE}
+knitr::kable(
+joined_data %>%
+  group_by(diff) %>% 
+  summarize(n = n()) %>%
+  mutate(percent = round((n/sum(n))*100, 2),
+         qual_sentiment = c("negative"),
+         quant_sentiment = case_when(
+           diff == 0 ~ "negative",
+           diff == 1 ~ "neutral",
+           diff == 2 ~ "positive"
+         )
+        ) %>% 
+  select("Qualitative Sentiment" = qual_sentiment,
+         "Quantitative Sentiment" = quant_sentiment,
+         "Difference" = diff,
+         "Count" = n,
+         "Total Percentage" = percent),
+caption="Overall Summary"
+)
+```
+
+
+```{r theme summary, echo=FALSE}
+counts <- joined_data %>%
+  mutate(theme = str_replace_all(theme, "_", " ")) %>% 
+  group_by(theme) %>% 
+  summarize(n = n())
+
+theme_percents<- joined_data %>% 
+  mutate(theme = str_replace_all(theme, "_", " ")) %>% 
+  group_by(theme, diff) %>% 
+  summarize(n = n()) %>% 
+  mutate(perc = round(n/sum(n)*100,2)) %>% 
+  select(theme, diff, perc) %>% 
+  spread(diff, perc) %>% 
+  rename("Theme" = theme,
+         "Difference of 0 (%)" = "0",
+         "Difference of 1 (%)" = "1",
+         "Difference of 2 (%)" = "2") 
+
+# had to create new table to add in counts, ask Aaron how to do this differently
+knitr::kable(
+  data_frame(Theme = theme_percents$Theme, 
+           "Total Number" = as.numeric(counts$n[match(theme_percents$Theme, counts$theme)]),  
+           "Difference of 0 (%)" = theme_percents$`Difference of 0 (%)`,
+           "Difference of 1 (%)" = theme_percents$`Difference of 1 (%)`,
+           "Difference of 2 (%)" = theme_percents$`Difference of 2 (%)`),
+caption = "Differences by theme")
+
+
+
+grouped_data <- joined_data %>% 
+  mutate(theme = str_replace_all(theme, "_", " ")) %>% 
+  group_by(theme, diff) %>% 
+  summarize(n = n())
+  
+  
+grouped_data %>% 
+  ggplot(aes(theme, n)) + 
+    geom_col() +
+    facet_wrap(~diff, nrow=3) + 
+    theme_bw() +
+    theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+    labs(x="", y="count")
+
+ggplot(data=grouped_data) +
+  geom_col(aes(x=diff, y=n)) +
+  facet_wrap(~theme) +
+  labs(x="", y="count") +
+  theme_bw() 
+
+
+ggplot(data=grouped_data) +
+  geom_col(aes(x=theme, y=n, fill=factor(diff))) +
+  labs(fill="Difference", x="", y="count") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45, hjust = 1))
+
+
+```
+
+
+
+
+
+## Comments and To do's
+
+- flexibile work environment & job_suitability don't really match -- not sure what to do about this *** DO NOT start writing about results until this corrected
+
+- does anything need to be "normalized", by divided by total number of comments. Like if there are way more comments about x vs y. Currently showing total counts to offset this, ask aaron about how to do mutate after something has been group_by
+
+
+
+```{r, echo=FALSE}
+# not sure what is going on
+# to make it work, first have to comment out the render part and use the Knit button
+# then uncomment out render part and run cell 
+# this will place the report in the correct output directory
+# have to go back and delete the rendered version in the notebook folder that the
+# Knit button created 
+# otherwise it wont render the new changes
+# or throws this error "Error in sink(con, split = debug) : sink stack is full"
+
+output_path <- here::here("reports")
+
+#rmarkdown::render("ap_qual_to_quant_base_model.Rmd", 
+#                  output_dir = output_path)
+```
