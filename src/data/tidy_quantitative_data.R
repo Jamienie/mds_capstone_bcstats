@@ -127,5 +127,5 @@ df_info <- df_info %>%
 # Write quantitative data files to csv                                        #
 ###############################################################################
 
-write.csv(df_questions, filepath_out_questions)
-write.csv(df_info, filepath_out_info)
+write_csv(df_questions, filepath_out_questions)
+write_csv(df_info, filepath_out_info)
