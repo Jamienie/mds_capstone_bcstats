@@ -1,0 +1,217 @@
+---
+title: "Qualitative to Quantitative Sub Theme Model"
+author: "Aaron Quinton, Ayla Pearson, Fan Nie"
+date: "June 2019"
+output: 
+  pdf_document
+---
+
+
+
+```{r setup, echo=FALSE, include=FALSE, message=FALSE}
+# Require pkgs `tidyverse`, `readxl`, `testthat` and `knitr`
+library(tidyverse)
+library(testthat)
+library(readxl)
+library(scales)
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+
+
+```{r load data, echo=FALSE}
+# load quantitative data
+path_quant <- "./data/processed/tidy_quant_questions.csv"
+quant <- read_csv(path_quant)
+# load qualitative data
+path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
+qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
+```
+
+
+```{r clean and wrangle qualitative data, include=FALSE}
+
+# subset required columns, rename and filter out people who only had positive 
+#comments
+qual <- qual %>% 
+  select(`_telkey`, `Code 1`, `Code 2`, `Code 3`, `Code 4`, `Code 5`) %>% 
+  rename(USERID = `_telkey`,
+         code1 = `Code 1`,
+         code2 = `Code 2`,
+         code3 = `Code 3`,
+         code4 = `Code 4`,
+         code5 = `Code 5`) %>% 
+  filter(!(code1 == 122 & is.na(code2))) 
+
+# re-organize data into tidy form
+qual <- gather(qual, key= "code_num", value="code", code1, code2, code3, code4, code5)
+
+
+# remove other theme and unrelated comments, create negative rating, and
+# add main themes label from subtheme code
+qual <- qual %>% 
+  drop_na(code) %>% 
+  filter(code != 99) %>% 
+  filter(code != 121) %>% 
+  filter(code != 123) %>% 
+  filter(code != 122) %>% 
+  mutate(qual_value = -1) %>% 
+  select(USERID, code, qual_value)
+
+
+# First Unit Test to confirm q
+person1 = "172541-914038"  # 4 separate codes, all should appear = 4
+person2 = "173108-219388"  # only has code 122, should NOT appear = 0
+person3 = "173924-784228"  # has code 122 and 93, only code 93 should appear =1
+person4 = "190199-111388"  # only has comment 99, should NOT appear =0
+person5 = "180129-727518"  # has 4 codes, one being 123, so only 3 should appear =3
+
+test1 <- qual %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  arrange(USERID)
+
+test_that("qualitative has been properly filtered", {
+  expect_equal(nrow(test1), 8)
+})
+```
+
+
+
+
+```{r clean and wrangle quantitative data, include=FALSE}
+# select the 2018 questions 
+quant <- quant %>% 
+  filter(survey_year == 2018) %>% 
+  select(USERID, dplyr::matches("Q.."))  %>% 
+  gather(key = "theme", value="score", dplyr::matches("Q..")) %>% 
+  drop_na() %>% 
+  mutate(
+    theme = factor(theme),
+    quan_value = case_when(
+      score < 50     ~ -1,
+      score == 50    ~  0,
+      score > 50     ~  1,
+      TRUE           ~ 99
+    )
+  ) %>% 
+  select(USERID, theme, quan_value)
+
+## need to change this to the original file after inter-rater check
+# read in labels
+labels <- read_csv("./references/data-dictionaries/survey_mc_legend_subthemes.csv")
+
+labels <- labels %>% 
+  filter(survey_year == "2018") %>% 
+  filter(category == "Raw Survey Question") %>% 
+  select(new_column_name, sub_theme) %>% 
+  mutate(sub_theme = (na_if(sub_theme, 0))) %>% 
+  separate(sub_theme, sep=",", into = c("theme1", "theme2")) %>% 
+  gather(key="theme_name", value="theme", theme1, theme2) %>% 
+  select(theme, new_column_name) %>% 
+  drop_na(theme) %>% 
+  arrange(new_column_name)
+
+# rename theme to question number
+quant_data <- quant %>% 
+  mutate(code = as.numeric(labels$theme[match(quant$theme, labels$new_column_name)])) %>%
+  select(USERID, code, quan_value)
+```
+
+```{r combine qualitative and quantitative data, include=FALSE}
+joined_data <- left_join(qual, quant_data, by=c("USERID", "code")) %>% 
+  drop_na(quan_value) %>% 
+  mutate(diff = quan_value - qual_value)
+```
+
+```{r overall summary,  echo=FALSE}
+knitr::kable(
+joined_data %>%
+  group_by(diff) %>% 
+  summarize(n = n()) %>%
+  mutate(percent = round((n/sum(n))*100, 2),
+         qual_sentiment = c("negative"),
+         quant_sentiment = case_when(
+           diff == 0 ~ "negative",
+           diff == 1 ~ "neutral",
+           diff == 2 ~ "positive"
+         )
+        ) %>% 
+  select("Qualitative Sentiment" = qual_sentiment,
+         "Quantitative Sentiment" = quant_sentiment,
+         "Difference" = diff,
+         "Count" = n,
+         "Total Percentage" = percent),
+caption="Overall Summary"
+)
+```
+
+```{r sub_theme summary, echo=FALSE}
+# counts by code 
+grouped_data <- joined_data %>% 
+  group_by(code, diff) %>% 
+  summarize(n = n()) %>% 
+  arrange(code)
+
+# create table
+theme_percents <- grouped_data %>% 
+  mutate(perc = round(n/sum(n)*100,2)) %>% 
+  select(code, diff, perc) %>% 
+  spread(diff, perc) %>% 
+  rename("Sub-theme" = code,
+         "Difference of 0 (%)" = "0",
+         "Difference of 1 (%)" = "1",
+         "Difference of 2 (%)" = "2") 
+
+counts <- joined_data %>%
+  group_by(code) %>% 
+  summarize(n = n())
+
+
+# had to create new table to add in counts, ask Aaron how to do this differently
+knitr::kable(
+  data_frame(Theme = theme_percents$`Sub-theme`, 
+           "Total Number" = as.numeric(counts$n[match(theme_percents$`Sub-theme`, counts$code)]),  
+           "Difference of 0 (%)" = theme_percents$`Difference of 0 (%)`,
+           "Difference of 1 (%)" = theme_percents$`Difference of 1 (%)`,
+           "Difference of 2 (%)" = theme_percents$`Difference of 2 (%)`),
+caption = "Differences by theme")
+
+# plots
+grouped_data %>% 
+  ggplot(aes(code, n)) + 
+    geom_col() +
+    facet_wrap(~diff, nrow=3) + 
+    theme_bw() +
+    theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+    labs(x="subtheme codes", y="count") +
+    scale_x_continuous(limits = c(10, 105),
+    breaks= scales::pretty_breaks(n=20))
+
+ggplot(data=grouped_data) +
+  geom_col(aes(x=diff, y=n)) +
+  facet_wrap(~code) +
+  labs(x="", y="count") +
+  theme_bw() 
+
+
+ggplot(data=grouped_data) +
+  geom_col(aes(x=code, y=n, fill=factor(diff))) +
+  labs(fill="Difference", x="sub-theme", y="count") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_x_continuous(limits = c(10, 105),
+  breaks= scales::pretty_breaks(n=20))
+```
+
+
+
+
+
+## Comments and To do's
+
+- not sure why "Warning message:  Unknown or uninitialised column: 'theme'." keeps appearing
+
+- write some more unit tests/double check filter conditions
+
+- generalize up to the main themes

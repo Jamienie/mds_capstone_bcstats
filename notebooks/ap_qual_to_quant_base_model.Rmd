@@ -295,9 +295,14 @@ ggplot(data=grouped_data) +
 
 ## Comments and To do's
 
-- flexibile work environment & job_suitability don't really match -- not sure what to do about this *** DO NOT start writing about results until this corrected
+- flexible work environment & job_suitability don't really match -- not sure what to do about this *** DO NOT start writing about results until this corrected
 
-- does anything need to be "normalized", by divided by total number of comments. Like if there are way more comments about x vs y. Currently showing total counts to offset this, ask aaron about how to do mutate after something has been group_by
+- does anything need to be "normalized", by divided by total number of comments. Like if there are way more comments about x vs y. Currently showing total counts to offset this, ask Aaron about how to do mutate after something has been group_by
+
+
+- render issue below
+
+- also under Knit button I have to select Current Working Directory for it to read in the data
 
 
 
