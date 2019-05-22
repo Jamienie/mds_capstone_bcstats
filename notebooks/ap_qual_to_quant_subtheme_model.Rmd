@@ -9,11 +9,13 @@ output:
 
 
 ```{r setup, echo=FALSE, include=FALSE, message=FALSE}
-# Require pkgs `tidyverse`, `readxl`, `testthat` and `knitr`
+# Require pkgs `tidyverse`, `readxl`, `testthat, `knitr`, `here`, `flextable` and `webshot`
 library(tidyverse)
 library(testthat)
 library(readxl)
-library(scales)
+#library(scales)
+library(flextable)
+library(webshot)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
@@ -134,84 +136,160 @@ joined_data %>%
          quant_sentiment = case_when(
            diff == 0 ~ "negative",
            diff == 1 ~ "neutral",
-           diff == 2 ~ "positive"
-         )
+           diff == 2 ~ "positive"),
+         diff = case_when(
+           diff == 0 ~ "strong",
+           diff == 1 ~ "medium",
+           diff == 2 ~ "weak")
         ) %>% 
   select("Qualitative Sentiment" = qual_sentiment,
          "Quantitative Sentiment" = quant_sentiment,
-         "Difference" = diff,
+         "Level of Agreement" = diff,
          "Count" = n,
          "Total Percentage" = percent),
 caption="Overall Summary"
 )
 ```
 
-```{r sub_theme summary, echo=FALSE}
-# counts by code 
+
+
+
+
+
+
+
+```{r sub_theme summary, , include=FALSE}
+
+theme_qual <- tribble(
+  ~num, ~theme,
+     1, "Career & Personal Development",
+     2, "Compensation & Benefits",
+     3, "Engagement & Workplace Culture",
+     4, "Executives",
+     5, "Flexible Work Environment",
+     6, "Staffing Practices",
+     7, "Recognition & Empowerment",
+     8, "Supervisors",
+     9, "Stress & Workload",
+     10,"Tools, Equipment & Physical Environment",
+     11, "Vision, Mission & Goals"
+)
+
+
 grouped_data <- joined_data %>% 
   group_by(code, diff) %>% 
   summarize(n = n()) %>% 
   arrange(code)
 
-# create table
-theme_percents <- grouped_data %>% 
-  mutate(perc = round(n/sum(n)*100,2)) %>% 
-  select(code, diff, perc) %>% 
-  spread(diff, perc) %>% 
-  rename("Sub-theme" = code,
-         "Difference of 0 (%)" = "0",
-         "Difference of 1 (%)" = "1",
-         "Difference of 2 (%)" = "2") 
-
+# create total count by sub-theme for matching below
 counts <- joined_data %>%
   group_by(code) %>% 
   summarize(n = n())
 
 
-# had to create new table to add in counts, ask Aaron how to do this differently
-knitr::kable(
-  data_frame(Theme = theme_percents$`Sub-theme`, 
-           "Total Number" = as.numeric(counts$n[match(theme_percents$`Sub-theme`, counts$code)]),  
-           "Difference of 0 (%)" = theme_percents$`Difference of 0 (%)`,
-           "Difference of 1 (%)" = theme_percents$`Difference of 1 (%)`,
-           "Difference of 2 (%)" = theme_percents$`Difference of 2 (%)`),
-caption = "Differences by theme")
+# create summary table for display
 
-# plots
-grouped_data %>% 
-  ggplot(aes(code, n)) + 
-    geom_col() +
-    facet_wrap(~diff, nrow=3) + 
-    theme_bw() +
-    theme(axis.text.x = element_text(angle=45, hjust = 1)) +
-    labs(x="subtheme codes", y="count") +
-    scale_x_continuous(limits = c(10, 105),
-    breaks= scales::pretty_breaks(n=20))
+table1 <- grouped_data %>% 
+  mutate(perc = round(n/sum(n)*100,2)) %>% 
+  select(code, diff, perc) %>% 
+  spread(diff, perc) %>% 
+  ungroup() %>% 
+  mutate(counts = counts$n[match(`code`, counts$code)],
+         main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)],
+         code = as.character(`code`)) %>% 
+  select(Theme,
+         "Sub-theme" = code,
+         "Total Number" = counts,
+         "Strong Agreement (%)" = "0",
+         "Medium Agreement (%)" = "1",
+         "Weak Agreement (%)" = "2")  
+ 
+```
 
-ggplot(data=grouped_data) +
-  geom_col(aes(x=diff, y=n)) +
+```{r, echo=FALSE}
+# convert table to html to png
+myft <- flextable(
+  table1,
+  col_keys = c("Theme", "Sub-theme", "Total Number", "Strong Agreement (%)",
+         "Medium Agreement (%)", "Weak Agreement (%)"))
+myft <- merge_v(myft, j="Theme")
+myft <- autofit(theme_vanilla(myft))
+myft <- fontsize(myft, part = "all", size = 17) 
+myft <- align( myft, align = "center", part = "header" )
+
+save_as_html(myft, path = "reports/figures/image.html")
+webshot("reports/figures/image.html", file = "reports/figures/image2.png")
+
+```
+
+
+```{r, echo=FALSE, fig.height=6}
+
+group2 <- grouped_data %>% 
+  mutate(main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)])
+
+ggplot(data=group2) +
+  geom_col(aes(x=diff, y=n, fill=Theme)) +
   facet_wrap(~code) +
-  labs(x="", y="count") +
-  theme_bw() 
-
-
-ggplot(data=grouped_data) +
-  geom_col(aes(x=code, y=n, fill=factor(diff))) +
-  labs(fill="Difference", x="sub-theme", y="count") +
+  labs(x="", y="count", fill="") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
-  scale_x_continuous(limits = c(10, 105),
-  breaks= scales::pretty_breaks(n=20))
+  scale_fill_brewer(type="qual", palette = "Paired") +
+  ylim(0, 1500) +
+  theme(legend.position="bottom") +
+  guides(fill=guide_legend(nrow=4))
+
+```
+
+```{r echo=FALSE}
+general_theme <- grouped_data %>% 
+  mutate(main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)]) %>% 
+  ungroup() %>% 
+  select(Theme, diff, n) %>% 
+  group_by(Theme, diff) %>% 
+  summarize(counter = sum(n))
+
+ggplot(data=general_theme) +
+  geom_bar(aes(x=Theme, y=counter, fill=factor(diff)), stat = "identity", position = "fill") +
+  labs(fill="Level of Agreement", x="", y="") +
+  ggtitle("Generalized to Main Qualitative Theme") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=60, hjust = 1)) +
+  scale_fill_discrete(labels=c("Strong", "Medium", "Weak")) +
+  scale_fill_brewer(type="qual", palette = "Set2")
 ```
 
 
 
 
+<img src="../reports/figures/image2.png">
+
+
+
+```{r knit file, , include=FALSE}
+# uncomment and run
+
+# output_path <- here::here("reports")
+# rmarkdown::render(input = "notebooks/ap_qual_to_quant_subtheme_model.Rmd",
+#                   knit_root_dir = "..",
+#                  output_dir = output_path,
+#                  output_file = "ap_report",
+#                  output_format = "pdf_document")
+```
+
 
 ## Comments and To do's
 
-- not sure why "Warning message:  Unknown or uninitialised column: 'theme'." keeps appearing
-
 - write some more unit tests/double check filter conditions
 
-- generalize up to the main themes
+- create table/appendix that lists sub-themes, their names and main theme groups
+
+- change other table to this format
+
+- fix names
+
+- start writing
+
+- why does img html tag have to go from back to render properly 
