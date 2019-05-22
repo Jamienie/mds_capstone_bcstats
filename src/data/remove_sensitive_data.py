@@ -3,7 +3,7 @@
 # Date: 2019-05-19
 
 import pandas as pd
-from src.data import sensitive_text
+import sensitive_text
 
 # File paths to Read the Qualitative Data
 filepath_2015 = "data/raw/WES2015_Final_Qual_Results.xlsx"
@@ -38,6 +38,6 @@ df_raw_2018 = df_raw_2018.drop(index=index2018)
 
 # Write raw train and test dataframes to csv with the sensitive rows removed
 # 2015
-df_raw_2015.to_csv(filepath_out_2015)
+df_raw_2015.to_csv(filepath_out_2015, index=False)
 # 2018
-df_raw_2018.to_csv(filepath_out_2018)
+df_raw_2018.to_csv(filepath_out_2018, index=False)
