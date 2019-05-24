@@ -8,20 +8,20 @@ output:
 
 
 
-```{r setup, echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=FALSE, message=FALSE}
 # Require pkgs `tidyverse`, `readxl`, `testthat` and `knitr`
 library(tidyverse)
 library(readxl)
 library(testthat)
 
 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, root.dir = normalizePath(".."))
 
 ```
 
+#'
 
-
-```{r load data, echo=FALSE}
+```{r, load data, echo=FALSE}
 # load quantitative data
 path_quant <- "./data/processed/tidy_quant_questions.csv"
 quant <- read_csv(path_quant)
@@ -30,7 +30,7 @@ path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
 qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
 ```
 
-
+#'
 
 
 ```{r clean and wrangle qualitative data, include=FALSE}
@@ -106,6 +106,7 @@ test_that("test that test2 has 5 rows", {
 
 ```
 
+#'
 
 ```{r clean and wrangle quantitative data, echo=FALSE, include=FALSE}
 
@@ -249,6 +250,8 @@ theme_percents<- joined_data %>%
          "Difference of 2 (%)" = "2") 
 
 # had to create new table to add in counts, ask Aaron how to do this differently
+# may be able to do some form of ungroup to deal with the aggregation issue
+
 knitr::kable(
   data_frame(Theme = theme_percents$Theme, 
            "Total Number" = as.numeric(counts$n[match(theme_percents$Theme, counts$theme)]),  
@@ -279,7 +282,7 @@ ggplot(data=grouped_data) +
   labs(x="", y="count") +
   theme_bw() 
 
-
+# this was the fan fav 
 ggplot(data=grouped_data) +
   geom_col(aes(x=theme, y=n, fill=factor(diff))) +
   labs(fill="Difference", x="", y="count") +
@@ -296,28 +299,16 @@ ggplot(data=grouped_data) +
 ## Comments and To do's
 
 - flexible work environment & job_suitability don't really match -- not sure what to do about this *** DO NOT start writing about results until this corrected
-
-- does anything need to be "normalized", by divided by total number of comments. Like if there are way more comments about x vs y. Currently showing total counts to offset this, ask Aaron about how to do mutate after something has been group_by
-
-
-- render issue below
-
-- also under Knit button I have to select Current Working Directory for it to read in the data
-
+ - not sure how much I need to figure this out because this isn't really the deliverable for the client
 
 
 ```{r, echo=FALSE}
-# not sure what is going on
-# to make it work, first have to comment out the render part and use the Knit button
-# then uncomment out render part and run cell 
-# this will place the report in the correct output directory
-# have to go back and delete the rendered version in the notebook folder that the
-# Knit button created 
-# otherwise it wont render the new changes
-# or throws this error "Error in sink(con, split = debug) : sink stack is full"
 
 output_path <- here::here("reports")
 
-#rmarkdown::render("ap_qual_to_quant_base_model.Rmd", 
-#                  output_dir = output_path)
+rmarkdown::render(input = "notebooks/ap_qual_to_quant_base_model.Rmd", 
+                   knit_root_dir = "..",
+                  output_dir = output_path,
+                  output_file = "ap_report",
+                  output_format = "pdf_document")
 ```
