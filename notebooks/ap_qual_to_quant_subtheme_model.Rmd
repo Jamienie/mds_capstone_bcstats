@@ -6,14 +6,62 @@ output:
   pdf_document
 ---
 
+# Introduction
+
+Quantitative studies generate data in numerical forms that can be analyzed, summarized and expressed by statistics. Qualitative studies generate data that is often not numerical and more descriptive. Generally, these forms of data are analyzed separately because they can be difficult to relate. In recent years mixed methods research has been developed to combine these types of data which can give a better overall picture of the results.  
+
+The BC Public Service conducts a Work Environment Survey (WES) with the goals of understanding their employees' experience, celebrating their successes and identifying their areas for improvement. WES collects quantitative data through 80 multiple-choice questions and qualitative data through a single written response question "What one thing would you like your organization to focus on to improve your work environment?". 
+
+We are investigating how the sentiment between the qualitative and quantitative data agree based on the topics addressed within the WES. This will help to determine how well the multiple-choice questions are capturing what improvements employees are wanting. We are hoping this can lead to improvement to the WES structure and ensure the voices of the employees are being heard. It may also help to give more detail and context to the multiple-choice responses. 
+
+# Methods
+
+To relate the sentiment of the written response question to the multiple-choice questions at the sub-theme level each multiple-choice question was given a sub-theme code. This was done by reading the multiple-choice questions and matching them to the written response sub-themes. Not all multiple-choice questions matched to a sub-theme and others questions matched to multiple sub-themes. Three independent raters coded the multiple-choice questions and inter-rater agreement was calculated. 
+The comments from the written response questions all have negative sentiment that relates to the sub-theme topics. One of the sub-theme codes relates to positive comments but these do not correspond to specific topics and were filtered out of the data set. The multiple-choice questions can range from positive to negative sentiment based on a five-point rating scale.
+
+![](../reports/figures/img_mc_numeric_to_sentiment_150.png)
+
+Since there is only one written response per person with a maximum of five sub-themes to determine the level of agreement the written response sentiment was matched to the related multiple-choice questions. There are three levels of agreement strong, medium and weak as shown in table 2. 
+
+![](../reports/figures/table_sentiment_agreement.png)
+
+To determine the level of agreement for the main themes the sub-themes data was aggregated and generalized. 
+
+
+# Discussion
+
+- do not start writing until inter-rater stuff done and final sub-theme mc done
+- discuss sub-theme--mc matching
+   - visualization to show which sub-themes appeared multiple times to which didn't at all 
+   - lack of flexible work mc 
+
+
+
+# Results & Recommendations
+
+- summary table showing top 5 strong and top 5 weak 
+ 
+# Literature
+
+Wisdom J and Creswell JW. Mixed Methods: Integrating Quantitative and Qualitative Data Collection and Analysis While Studying Patient-Centered Medical Home Models. Rockville, MD: Agency for Healthcare Research and Quality. February 2013. AHRQ Publication No. 13-0028-EF
+
+-	Talks about validating findings using qual and quant data (Wisdom & Creswell, 2013)
+
+
+
+# Appendix
+
+- create table to match sub-theme numbers to names
+
 
 
 ```{r setup, echo=FALSE, include=FALSE, message=FALSE}
-# Require pkgs `tidyverse`, `readxl`, `testthat` and `knitr`
+# Require pkgs `tidyverse`, `readxl`, `testthat, `knitr`, `here`, `flextable` and `webshot`
 library(tidyverse)
-library(testthat)
 library(readxl)
-library(scales)
+library(testthat)
+library(flextable)
+library(webshot)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
@@ -27,6 +75,7 @@ quant <- read_csv(path_quant)
 # load qualitative data
 path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
 qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
+qual_subtheme_labels <- read_excel(path_qual, sheet = "Codebook", range = "B2:C75", col_names = c("Code", "Description"))
 ```
 
 
@@ -118,100 +167,243 @@ quant_data <- quant %>%
   select(USERID, code, quan_value)
 ```
 
-```{r combine qualitative and quantitative data, include=FALSE}
+```{r combine dataframes, include=FALSE}
+# combine qualitative and quanitative dfs
 joined_data <- left_join(qual, quant_data, by=c("USERID", "code")) %>% 
   drop_na(quan_value) %>% 
   mutate(diff = quan_value - qual_value)
 ```
 
+
+
+
+
+```{r table for agreement to sentiment, include=FALSE}
+# methods table to show how sentiment relates to level of agreement
+table_sent_agreement <- tribble(
+  ~`Qualitative Sentiment`, ~`Quantitative Sentiment`, ~`Level of Agreement`,
+                "negative",              "negative",             "strong",
+                "negative",              "neutral" ,             "medium",
+                "negative",              "positive",               "weak"
+)
+
+tb2 <- flextable(
+  table_sent_agreement,
+  col_keys = c("Qualitative Sentiment", 
+               "Quantitative Sentiment", 
+               "Level of Agreement")
+              )
+tb2 <- autofit(theme_vanilla(tb2))
+tb2 <- set_caption(tb2, "Table 1. Level of Agreement from Qualitative and Quantitative Sentiment")
+tb2 <- fontsize(tb2, part = "header", size = 10)
+tb2 <- fontsize(tb2, part = "body", size = 8)
+save_as_html(tb2, path = "reports/figures/table_sentiment_agreement.html")
+webshot("reports/figures/table_sentiment_agreement.html", file = "reports/figures/table_sentiment_agreement.png", cliprect = c(0,0, 450, 150), zoom=10)
+```
+
+
+
 ```{r overall summary,  echo=FALSE}
-knitr::kable(
-joined_data %>%
+# df of subtheme overall summary
+table_overall <- joined_data %>%
   group_by(diff) %>% 
   summarize(n = n()) %>%
   mutate(percent = round((n/sum(n))*100, 2),
-         qual_sentiment = c("negative"),
-         quant_sentiment = case_when(
-           diff == 0 ~ "negative",
-           diff == 1 ~ "neutral",
-           diff == 2 ~ "positive"
-         )
+         diff = case_when(
+           diff == 0 ~ "strong",
+           diff == 1 ~ "medium",
+           diff == 2 ~ "weak")
         ) %>% 
-  select("Qualitative Sentiment" = qual_sentiment,
-         "Quantitative Sentiment" = quant_sentiment,
-         "Difference" = diff,
+  select("Level of Agreement" = diff,
          "Count" = n,
-         "Total Percentage" = percent),
-caption="Overall Summary"
-)
+         "Total Percentage" = percent)
+# create table output as html, save as png and crop to desired size
+tb3 <- flextable(
+  table_overall,
+  col_keys = c("Level of Agreement", 
+               "Count",
+               "Total Percentage")
+              )
+tb3 <- autofit(theme_vanilla(tb3))
+tb3 <- set_caption(tb3, "Table 3. Overall Counts of each level of Agreement")
+tb3 <- fontsize(tb3, part = "header", size = 12)
+tb3 <- fontsize(tb3, part = "body", size = 10)
+save_as_html(tb3, path = "reports/figures/table_subtheme_overall.html")
+webshot("reports/figures/table_subtheme_overall.html", file = "reports/figures/table_subtheme_overall.png", cliprect = c(0,0, 600, 150), zoom=10)
 ```
 
-```{r sub_theme summary, echo=FALSE}
-# counts by code 
+
+
+
+
+
+
+
+```{r sub_theme summary, include=FALSE}
+# create matching between theme number and name
+theme_qual <- tribble(
+  ~num, ~theme,
+     1, "Career & Personal Development",
+     2, "Compensation & Benefits",
+     3, "Engagement & Workplace Culture",
+     4, "Executives",
+     5, "Flexible Work Environment",
+     6, "Staffing Practices",
+     7, "Recognition & Empowerment",
+     8, "Supervisors",
+     9, "Stress & Workload",
+     10,"Tools, Equipment & Physical Environment",
+     11, "Vision, Mission & Goals",
+     12, "Other"
+)
+
+# group data for plotting and tables 
 grouped_data <- joined_data %>% 
   group_by(code, diff) %>% 
   summarize(n = n()) %>% 
   arrange(code)
 
-# create table
-theme_percents <- grouped_data %>% 
-  mutate(perc = round(n/sum(n)*100,2)) %>% 
-  select(code, diff, perc) %>% 
-  spread(diff, perc) %>% 
-  rename("Sub-theme" = code,
-         "Difference of 0 (%)" = "0",
-         "Difference of 1 (%)" = "1",
-         "Difference of 2 (%)" = "2") 
-
+# create total count by sub-theme for matching below
 counts <- joined_data %>%
   group_by(code) %>% 
   summarize(n = n())
 
+# create summary table for display
+table_main_theme_subtheme <- grouped_data %>% 
+  mutate(perc = round(n/sum(n)*100,2)) %>% 
+  select(code, diff, perc) %>% 
+  spread(diff, perc) %>% 
+  ungroup() %>% 
+  mutate(counts = counts$n[match(`code`, counts$code)],
+         main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)],
+         code = as.character(`code`)) %>% 
+  select(Theme,
+         "Sub-theme" = code,
+         "Total Number" = counts,
+         "Strong Agreement (%)" = "0",
+         "Medium Agreement (%)" = "1",
+         "Weak Agreement (%)" = "2")  
+ 
+```
 
-# had to create new table to add in counts, ask Aaron how to do this differently
-knitr::kable(
-  data_frame(Theme = theme_percents$`Sub-theme`, 
-           "Total Number" = as.numeric(counts$n[match(theme_percents$`Sub-theme`, counts$code)]),  
-           "Difference of 0 (%)" = theme_percents$`Difference of 0 (%)`,
-           "Difference of 1 (%)" = theme_percents$`Difference of 1 (%)`,
-           "Difference of 2 (%)" = theme_percents$`Difference of 2 (%)`),
-caption = "Differences by theme")
-
-# plots
-grouped_data %>% 
-  ggplot(aes(code, n)) + 
-    geom_col() +
-    facet_wrap(~diff, nrow=3) + 
-    theme_bw() +
-    theme(axis.text.x = element_text(angle=45, hjust = 1)) +
-    labs(x="subtheme codes", y="count") +
-    scale_x_continuous(limits = c(10, 105),
-    breaks= scales::pretty_breaks(n=20))
-
-ggplot(data=grouped_data) +
-  geom_col(aes(x=diff, y=n)) +
-  facet_wrap(~code) +
-  labs(x="", y="count") +
-  theme_bw() 
-
-
-ggplot(data=grouped_data) +
-  geom_col(aes(x=code, y=n, fill=factor(diff))) +
-  labs(fill="Difference", x="sub-theme", y="count") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
-  scale_x_continuous(limits = c(10, 105),
-  breaks= scales::pretty_breaks(n=20))
+```{r, echo=FALSE}
+# generate report quality table in html then to png
+tb4 <- flextable(
+  table_main_theme_subtheme,
+  col_keys = c("Theme", 
+               "Sub-theme", 
+               "Total Number", 
+               "Strong Agreement (%)",
+               "Medium Agreement (%)", 
+               "Weak Agreement (%)")
+              )
+tb4 <- merge_v(tb4, j="Theme")
+tb4 <- autofit(theme_vanilla(tb4))
+tb4 <- fontsize(tb4, part = "header", size = 16)
+tb4 <- fontsize(tb4, part = "body", size = 14)
+tb4 <- set_caption(tb4, "Table 4. Themes and Subtheme Level of Agreement")
+save_as_html(tb4, path = "reports/figures/table_maintheme_subtheme.html")
+webshot("reports/figures/table_maintheme_subtheme.html", file = "reports/figures/table_maintheme_subtheme.png", cliprect = c(0,0, 850, 850), zoom=10)
 ```
 
 
+```{r figure 1, echo=FALSE, fig.height=6}
+# add main theme labels to grouped data
+group2 <- grouped_data %>% 
+  mutate(main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)])
+# shows distribution of agreement for each subtheme
+ggplot(data=group2) +
+  geom_col(aes(x=factor(diff), y=n, fill=Theme)) +
+  facet_wrap(~code) +
+  labs(x="", y="count", fill="") +
+  ggtitle("Figure 1. Distribution of Agreement per Subtheme") +
+  theme_bw()+
+  scale_fill_brewer(type="qual", palette = "Paired") +
+  theme(legend.position="bottom") +
+  guides(fill=guide_legend(nrow=4)) +
+  scale_x_discrete(labels=c("0" = "Strong", "1" = "Medium",
+                              "2" = "Weak"))
+```
+
+```{r figure 2, echo=FALSE}
+# group data by main themes
+general_theme <- group2 %>% 
+  ungroup() %>% 
+  select(Theme, diff, n) %>% 
+  group_by(Theme, diff) %>% 
+  summarize(counter = sum(n))
+# proportions of agreeement by theme
+ggplot(data=general_theme) +
+  geom_bar(aes(x=Theme, y=counter, fill=factor(diff)), stat = "identity", position = "fill") +
+  labs(fill="Level of Agreement", x="", y="") +
+  ggtitle("Figure 2.Proportions of Agreeement by Qualitative Theme") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=60, hjust = 1)) +
+  scale_fill_brewer(type="qual", palette = "Set2", labels=c("Strong", "Medium", "Weak"))
+```
+
+<img src="../reports/figures/table_subtheme_overall.png">
+
+
+<img src="../reports/figures/table_maintheme_subtheme.png">
+
+
+```{r sub-theme appendix, include=FALSE}
+# appendix table showing subtheme codes and descriptions
+appendix_subtheme <- qual_subtheme_labels %>% 
+  filter(!Description %in% (theme_qual$theme)) %>% 
+  mutate(main_theme = str_sub(`Code`, start = 1, end = str_length(`Code`)-1),
+         Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)],
+         Theme = if_else(Code == 99, "", Theme) , 
+         Code = as.integer(Code),
+         Description = str_replace_all(Description, "_", " ")
+         ) %>% 
+  select(Theme, Code, Description)
+# generate png 
+appx <- flextable(
+  appendix_subtheme,
+  col_keys = c("Theme", 
+               "Code",
+               "Description")
+              )
+appx <- merge_v(appx, j="Theme")
+appx <- autofit(theme_vanilla(appx))
+appx <- set_caption(appx, "Appendix 1. Subtheme Code Descriptions")
+appx <- fontsize(appx, part = "header", size = 12)
+appx <- fontsize(appx, part = "body", size = 10)
+save_as_html(appx, path = "reports/figures/appendix_subtheme_desc.html")
+# split into 2 webshots due to table length
+webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/appendix_subtheme_desc1.png", cliprect = c(0,0, 600, 500), zoom=10)
+webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/appendix_subtheme_desc2.png", cliprect = c(500,0, 600, 1000), zoom=10)
+```
+
+![](../reports/figures/appendix_subtheme_desc1.png)
+![](../reports/figures/appendix_subtheme_desc2.png)
+
+
+```{r knit file, , include=FALSE}
+# uncomment and run
+
+# output_path <- here::here("reports")
+# rmarkdown::render(input = "notebooks/ap_qual_to_quant_subtheme_model.Rmd",
+#                   knit_root_dir = "..",
+#                  output_dir = output_path,
+#                  output_file = "ap_report",
+#                  output_format = "pdf_document")
+```
 
 
 
 ## Comments and To do's
 
-- not sure why "Warning message:  Unknown or uninitialised column: 'theme'." keeps appearing
-
 - write some more unit tests/double check filter conditions
 
-- generalize up to the main themes
+- find references for intro section/put them in
+
+- why does img html tag have to go from back to render properly 
+
+- need to look into why some don't agree
+
+- need to create vis/table to show sub-themes to mc relation
