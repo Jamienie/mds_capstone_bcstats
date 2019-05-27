@@ -1,138 +1,113 @@
 # preprocessing_text.py
 # Authors: Aaron Quinton
-# Date: 2019-05-15
+# Date: 2019-05-22
 
-# Many functions and the overall workflow have been built from a KDnuggets Blog
-# written by Matthew Mayo:
-# https://www.kdnuggets.com/2018/03/text-data-preprocessing-walkthrough-python.html
-
+# Many functions and the overall workflow have been built from Kaggle Kernel
+# written by "Dieter"
+# https://www.kaggle.com/christofhenkel/how-to-preprocessing-when-using-embeddings
 
 # Import modules
 import re
-import unicodedata
-import contractions
-import inflect
-from pattern.en import suggest
-from nltk import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import LancasterStemmer, WordNetLemmatizer
-
+import numpy as np
 
 ###############################################################################
-# Define specific preprocessing tasks as individual funtions to be combined   #
+# Functions used for preprocessing punctuation, numbers, and misspellings and #
+# bootstrapping comment data to balance comments per theme label              #
 ###############################################################################
 
-def replace_contractions(text):
-    """Replace contractions in string of text"""
-    return contractions.fix(text)
+
+def clean_text(x):
+
+    x = str(x)
+    for punct in "/-'":
+        x = x.replace(punct, ' ')
+    for punct in '&':
+        x = x.replace(punct, f' {punct} ')
+    for punct in '?!.,"#$%\'()*+-/:;<=>@[\\]^_`{|}~' + '“”’':
+        x = x.replace(punct, '')
+
+    return x
 
 
-def to_lowercase(text):
-    """Convert all characters in a string to lowercase"""
-    return text.lower()
+def clean_numbers(x):
+
+    x = re.sub('[0-9]{5,}', '#####', x)
+    x = re.sub('[0-9]{4}', '####', x)
+    x = re.sub('[0-9]{3}', '###', x)
+    x = re.sub('[0-9]{2}', '##', x)
+    return x
 
 
-def remove_non_ascii(words):
-    """Remove non-ASCII characters from list of tokenized words"""
-    new_words = []
-    for word in words:
-        new_word = unicodedata.normalize('NFKD', word)
-        new_word = new_word.encode('ascii', 'ignore').decode('utf-8', 'ignore')
-        new_words.append(new_word)
-    return new_words
+def _get_mispell(mispell_dict):
+    mispell_re = re.compile('(%s)' % '|'.join(mispell_dict.keys()))
+    return mispell_dict, mispell_re
 
 
-def reduce_lengthening(words):
-    """Reduce greater than 2 repeating characters in a word"""
-    new_words = []
-    for word in words:
-        pattern = re.compile(r"(.)\1{2,}")
-        new_word = pattern.sub(r"\1\1", word)
-        new_words.append(new_word)
-    return new_words
+mispell_dict = {'colour': 'color',
+                'centre': 'center',
+                'didnt': 'did not',
+                'doesnt': 'does not',
+                'isnt': 'is not',
+                'shouldnt': 'should not',
+                'behaviour': 'behavior',
+                'behaviours': 'behaviors',
+                'behavioural': 'behavioral',
+                'favourite': 'favorite',
+                'favouritism': 'favoritism',
+                'travelling': 'traveling',
+                'counselling': 'counseling',
+                'theatre': 'theater',
+                'acknowledgement': 'acknowledgment',
+                'cancelled': 'canceled',
+                'labour': 'labor',
+                'organisation': 'organization',
+                'wwii': 'world war 2',
+                'citicise': 'criticize',
+                'counsellor': 'counselor',
+                'favour': 'favor',
+                'defence': 'defense',
+                'practise': 'practice',
+                'instagram': 'social medium',
+                'whatsapp': 'social medium',
+                'snapchat': 'social medium'
+                }
+mispellings, mispellings_re = _get_mispell(mispell_dict)
 
 
-def correct_spelling(words):
-    """Correct all misspelled tokenized words in a list"""
-    new_words = []
-    for word in words:
-        suggested_word = suggest(word)
-        if suggested_word[0][1] > 0.75:
-            new_word = suggested_word[0][0]
-        else:
-            new_word = word
-        new_words.append(new_word)
-    return new_words
+def replace_typical_misspell(text):
+    def replace(match):
+        return mispellings[match.group(0)]
+
+    return mispellings_re.sub(replace, text)
 
 
-def remove_punctuation(words):
-    """Remove punctuation from list of tokenized words"""
-    new_words = []
-    for word in words:
-        new_word = re.sub(r'[^\w\s]', '', word)
-        if new_word != '':
-            new_words.append(new_word)
-    return new_words
+def remove_stopwords(sentences):
+    to_remove = ['a', 'to', 'of', 'and']
+
+    sentences_re = [[word for word in sentence if word not in to_remove]
+                    for sentence in sentences]
+
+    return sentences_re
 
 
-def replace_numbers(words):
-    """Replace all interger occurrences in list of tokenized words with textual
-    representation"""
-    p = inflect.engine()
-    new_words = []
-    for word in words:
-        if word.isdigit():
-            new_word = p.number_to_words(word)
-            new_words.append(new_word)
-        else:
-            new_words.append(word)
-    return new_words
+def balance_themes(X, Y):
+    counts = np.sum(Y, axis=0)
 
+    for i in range(Y.shape[1]):
 
-def remove_stopwords(words):
-    """Remove stop words from list of tokenized words"""
-    new_words = []
-    for word in words:
-        if word not in stopwords.words('english'):
-            new_words.append(word)
-    return new_words
+        X_labeled = X[Y[:, i] == 1, :]
+        Y_labeled = Y[Y[:, i] == 1, :]
 
+        index = np.random.randint(low=0, high=counts[i],
+                                  size=max(counts) - counts[i])
+        X_array_to_append = X_labeled[index, :]
+        Y_array_to_append = Y_labeled[index, :]
 
-def stem_words(words):
-    """Stem words in list of tokenized words"""
-    stemmer = LancasterStemmer()
-    stems = []
-    for word in words:
-        stem = stemmer.stem(word)
-        stems.append(stem)
-    return stems
+        if i == 0:
+            X_balance = X
+            Y_balance = Y
 
+        X_balance = np.vstack((X_balance, X_array_to_append))
+        Y_balance = np.vstack((Y_balance, Y_array_to_append))
 
-def lemmatize_verbs(words):
-    """Lemmatize verbs in list of tokenized words"""
-    lemmatizer = WordNetLemmatizer()
-    lemmas = []
-    for word in words:
-        lemma = lemmatizer.lemmatize(word, pos='v')
-        lemmas.append(lemma)
-    return lemmas
-
-
-###############################################################################
-# Combine preprocessing functions for overall
-###############################################################################
-
-def preprocess_text(text):
-    text = replace_contractions(text)
-    text = to_lowercase(text)
-    words = word_tokenize(text)
-    words = remove_non_ascii(words)
-    words = reduce_lengthening(words)
-    words = correct_spelling(words)
-    words = remove_punctuation(words)
-    words = replace_numbers(words)
-    words = remove_stopwords(words)
-    words = stem_words(words)
-    words = lemmatize_verbs(words)
-    text = ' '.join(words)
-    return text
+    return X_balance, Y_balance
