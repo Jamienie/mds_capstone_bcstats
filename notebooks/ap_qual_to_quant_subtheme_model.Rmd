@@ -56,12 +56,13 @@ Wisdom J and Creswell JW. Mixed Methods: Integrating Quantitative and Qualitativ
 
 
 ```{r setup, echo=FALSE, include=FALSE, message=FALSE}
-# Require pkgs `tidyverse`, `readxl`, `testthat, `knitr`, `here`, `flextable` and `webshot`
+# Require pkgs `tidyverse`, `readxl`, `testthat, `knitr`, `here`, `flextable`, `webshot` and `irr`
 library(tidyverse)
 library(readxl)
 library(testthat)
 library(flextable)
 library(webshot)
+library(irr)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
@@ -75,7 +76,16 @@ quant <- read_csv(path_quant)
 # load qualitative data
 path_qual <- "./data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
 qual <- read_excel(path_qual, sheet = "Comments", skip = 1)
+# load names/labels of qualitative sub-theme codes
 qual_subtheme_labels <- read_excel(path_qual, sheet = "Codebook", range = "B2:C75", col_names = c("Code", "Description"))
+
+# load sub-theme codes to question matching
+
+label_data <- read_csv("./references/data-dictionaries/survey_mc_legend.csv")
+
+# load raters sub-theme choices for inter-rater comparison
+path_inter.rater <- "./references/data-dictionaries/survey_mc_legend_inter-rater.csv"
+data_legend <- read_csv(path_inter.rater)
 ```
 
 
@@ -146,15 +156,13 @@ quant <- quant %>%
   ) %>% 
   select(USERID, theme, quan_value)
 
-## need to change this to the original file after inter-rater check
-# read in labels
-labels <- read_csv("./references/data-dictionaries/survey_mc_legend_subthemes.csv")
 
-labels <- labels %>% 
+
+labels <- label_data %>% 
   filter(survey_year == "2018") %>% 
   filter(category == "Raw Survey Question") %>% 
-  select(new_column_name, sub_theme) %>% 
-  mutate(sub_theme = (na_if(sub_theme, 0))) %>% 
+  select(new_column_name, subtheme_code) %>% 
+  mutate(sub_theme = (na_if(subtheme_code, 0))) %>% 
   separate(sub_theme, sep=",", into = c("theme1", "theme2")) %>% 
   gather(key="theme_name", value="theme", theme1, theme2) %>% 
   select(theme, new_column_name) %>% 
@@ -348,6 +356,38 @@ ggplot(data=general_theme) +
 
 
 <img src="../reports/figures/table_maintheme_subtheme.png">
+
+
+```{r inter-rater calculations}
+# column index 
+# ayla = 3
+# aaron = 4
+# fan = 5
+
+# fan vs aaron
+cat("fan vs aaron")
+kappa2(data[,4:5])
+cat("\n")
+
+# ayla vs aaron
+cat("ayla vs aaron")
+kappa2(data[,3:4])
+cat("\n")
+
+# fan vs ayla 
+cat("fan vs ayla")
+df <- tibble("ayla"=data$ayla, "fan"=data$fan)
+kappa2(df)
+cat("\n")
+
+# n raters (for all 3 of us)
+cat("all")
+kappam.fleiss(data[,3:5])
+
+
+
+```
+
 
 
 ```{r sub-theme appendix, include=FALSE}
