@@ -8,3 +8,4 @@ src/data/__pycache__/
 src/models/__pycache__/
 src/features/__pycache__/
 references/pretrained_embeddings.nosync
+references/pretrained_embeddings
