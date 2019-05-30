@@ -27,6 +27,8 @@ Since there is only one written response per person with a maximum of five sub-t
 
 To determine the level of agreement for the main themes the sub-themes data was aggregated and generalized. 
 
+**add changes that you did to method tonight, ie loss function penalty thign**
+
 
 # Discussion
 
@@ -92,7 +94,6 @@ data_legend <- read_csv(path_inter.rater)
 
 
 ```{r clean and wrangle qualitative data, include=FALSE}
-
 # subset required columns, rename and filter out people who only had positive 
 #comments
 qual <- data_qual %>% 
@@ -241,16 +242,10 @@ webshot("reports/figures/table_sentiment_agreement.html", file = "reports/figure
 joined_data <- left_join(qual, quant, by=c("USERID", "code"="theme")) %>% 
   drop_na(quan_value) %>% 
   mutate(diff = quan_value - qual_value)
-
-
-# join level of agreements with comments for topic modeling
-comments <- data_qual %>% 
-  select(USERID = `_telkey`,
-         text = `2018 Comment`)
-joined_comments <- left_join(joined_data, comments, by="USERID")
-# create csv for topic modeling
-write_csv(joined_comments, "./data/interim/joined_qual_quant.csv")
 ```
+
+
+
 
 ```{r overall summary,  echo=FALSE}
 # df of subtheme overall summary
@@ -302,15 +297,42 @@ theme_qual <- tribble(
 )
 
 # group data for plotting and tables 
+# changed the "loss penality" it now takes the minimum value
 grouped_data <- joined_data %>% 
+  group_by(USERID, code) %>% 
+  summarize(diff = min(diff)) %>% 
   group_by(code, diff) %>% 
-  summarize(n = n()) %>% 
-  arrange(code)
+  summarize(n=n())
 
-# create total count by sub-theme for matching below
+test8 <- joined_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  group_by(USERID, code) %>% 
+  summarize(diff = min(diff)) %>% 
+  group_by(code, diff) %>% 
+  summarize(n=n())
+
+test_that("Check loss function is taking minimum for each subtheme per person", {
+  expect_equal(nrow(test8), 4)
+  expect_equal(sum(test8$n), 4)
+  })
+
 counts <- joined_data %>%
+  group_by(USERID, code) %>% 
+  summarize(diff = min(diff)) %>% 
   group_by(code) %>% 
   summarize(n = n())
+
+test9 <- joined_data %>% 
+  filter(USERID %in% c(person1, person2, person3, person4, person5)) %>% 
+  group_by(USERID, code) %>% 
+  summarize(diff = min(diff)) %>% 
+  group_by(code) %>% 
+  summarize(n = n())
+
+test_that("Check loss function is taking minimum for counts", {
+  expect_equal(nrow(test9), 3)
+  expect_equal(sum(test9$n), 4)
+  })
 
 # create summary table for display
 table_main_theme_subtheme <- grouped_data %>% 
@@ -327,8 +349,18 @@ table_main_theme_subtheme <- grouped_data %>%
          "Total Number" = counts,
          "Strong Agreement (%)" = "0",
          "Weak Agreement (%)" = "1",
-         "No Agreement (%)" = "2")  
- 
+         "No Agreement (%)" = "2") 
+
+
+test10 <- table_main_theme_subtheme %>% 
+  filter(`Sub-theme` == 12)
+
+test_that("Check proportions are correct", {
+  expect_equal(test10$`Total Number`, 103)
+  expect_equal(test10$`Strong Agreement (%)`, 50.49)
+  expect_equal(test10$`Weak Agreement (%)`, 12.62)
+  expect_equal(test10$`No Agreement (%)`, 36.89)
+  })
 ```
 
 ```{r, echo=FALSE}
@@ -406,11 +438,8 @@ ggplot(data=general_theme) +
 
 
 
-```{r inter-rater calculations,  echo=FALSE}
-# column index 
-# ayla = 3
-# aaron = 4
-# fan = 5
+```{r inter-rater calculations, echo=FALSE}
+# column index ayla = 3, aaron = 4, fan = 5 
 
 # fan vs aaron
 fan_aaron <- kappa2(data_legend[,4:5])
@@ -442,12 +471,6 @@ tbl_inter <- autofit(theme_vanilla(tbl_inter))
 tbl_inter <- set_caption(tbl_inter, "Table 5. Themes and Subtheme Level of Agreement")
 save_as_html(tbl_inter, path = "reports/figures/table_inter-rater.html")
 webshot("reports/figures/table_inter-rater.html", file = "reports/figures/table_inter-rater.png", cliprect = c(0,0, 600, 200), zoom=10)
-
-# need to webshot and what not to display
-# think about how to tweak
-# maybe remove some of Fan's results so they are more conservative
-# group to main themese or something 
-# def talk about how there are over 60's groups so no adjustment was used because chance agreement here is much lower then when there are binary classes
 ```
 
 
@@ -478,12 +501,9 @@ appx <- fontsize(appx, part = "body", size = 10)
 save_as_html(appx, path = "reports/figures/appendix_subtheme_desc.html")
 webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/appendix_subtheme_desc.png", zoom=10)
 
-
 # split into 2 webshots due to table length
 # webshot("reports/figures/appendix_subtheme_desc.html", file =   "reports/figures/appendix_subtheme_desc1.png", cliprect = c(0,0, 600, 600), zoom=10)
 #webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/appendix_subtheme_desc2.png", cliprect = c(500,0, 600, 1000), zoom=10)
-
-
 ```
 
 
@@ -504,16 +524,19 @@ webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/a
 
 ## Comments and To do's
 
-- write some more unit tests/double check filter conditions
-
 - find references for intro section/put them in
 
 - why does img html tag have to go from back to render properly 
 
 - need to look into why some don't agree
+  - try unsupervised techniques like topic modelings, n-grams, etc
 
-- need to create vis/table to show sub-themes to mc relation
+- ask about agreement wording of "none" vs "no"
 
+- work on vis for kappa values, look at removing some of the NA issues
+  - maybe remove some of Fan's results so they are more conservative
+  - group to main themese or something 
+  - talk about how there are over 60's groups so no adjustment was used because chance agreement here is much lower then when there are binary classes
 
 
 
@@ -529,16 +552,24 @@ webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/a
 - may be moved to be inbetween things once complete
 
 
-
+```{r, include=FALSE}
+# join level of agreements with comments for topic modeling
+comments <- data_qual %>% 
+  select(USERID = `_telkey`,
+         text = `2018 Comment`)
+joined_comments <- left_join(joined_data, comments, by="USERID")
+# create csv for topic modeling
+write_csv(joined_comments, "./data/interim/joined_qual_quant.csv")
+```
 
 
 
 ```{r, include=FALSE}
+# looking this was helping manually assement of comments and differences
+
 joined_data %>% 
   filter(code == 81) %>% 
   filter(diff == 0)
-
-
 
 joined_data %>% 
   group_by(code) %>% 
@@ -589,12 +620,40 @@ quant %>%
 ```
 
 
-```{r create vis to show sub-theme question match}
-labels %>% 
-  group_by(theme) %>% 
-  summarise(number_of_subthemes_per_Q = n()) %>% 
-  arrange(number_of_subthemes_per_Q) %>% 
-  count(number_of_subthemes_per_Q)
+```{r create vis to show sub-theme question match, echo=FALSE}
+# grid for plott
+a <- rep(1:11, times=6)[1:63]
+b <- rep(1:11, each=11)[1:63]
+
+# create table with a grid for plotting
+total_subtheme <- data_qual %>% 
+  select(contains("Code")) %>% 
+  gather(key="code", value="subtheme") %>% 
+  drop_na() %>% 
+  group_by(subtheme) %>% 
+  summarize(total_comments=n()) %>% 
+  mutate(x_pos = a) %>% 
+  mutate(y_pos = b) %>% 
+  mutate(subtheme = as.character(subtheme)) %>% 
+  left_join(labels, by=c("subtheme" = "theme")) %>% 
+  mutate(question = if_else(is.na(question), "no", "has"))
+  
+total_subtheme %>% 
+  group_by(question) %>% 
+  summarise(n = n())
+
+# can add conditions to the labels
+# so like only ones that don't have mc questions related? or over a threshold?
+ggplot(data=total_subtheme) +
+  geom_point(aes(x=x_pos, y=y_pos, size=total_comments, color=question)) +
+  geom_text(aes(x=x_pos, y=y_pos, label=subtheme),hjust=1.4, vjust=1.3, size=3.2) +
+  theme_bw() +
+  labs(x="", y="", title="Matching of Subthemes to Multiple Choice Questions") +
+  theme(axis.text.x = element_blank(),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank()) +
+  guides(size=guide_legend(override.aes=list(colour="grey"))) +
+  scale_colour_manual(values = c("has"="thistle2", "no"="darkorchid2"))
 ```
 
 
