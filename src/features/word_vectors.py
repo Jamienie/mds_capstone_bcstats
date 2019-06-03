@@ -45,11 +45,11 @@ def check_coverage(vocab, embeddings_index):
             i += vocab[word]
             pass
 
-    print('Found embeddings for {:.2%} of vocab'.format(len(a) / len(vocab)))
-    print('Found embeddings for  {:.2%} of all text'.format(k / (k + i)))
+    vocab_coverage = len(a) / len(vocab)
+    text_coverage = k / (k + i)
     sorted_x = sorted(oov.items(), key=operator.itemgetter(1))[::-1]
 
-    return sorted_x
+    return vocab_coverage, text_coverage, sorted_x
 
 
 def get_average_embeddings(sentences, embeddings_index, n_features=300):
