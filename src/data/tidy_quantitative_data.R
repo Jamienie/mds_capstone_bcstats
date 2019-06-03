@@ -8,10 +8,13 @@
 
 # Require pkgs `foreign`, `sjlabelled`, and `tidyverse`
 library(tidyverse)
+library(zoo)
 
 # File input paths
-filepath_spss = "./data/raw/WES 2007-2018 LONGITUDINAL DATA_short.sav"
+filepath_spss = "./data/raw/WES 2007-2018 LONGITUDINAL DATA.sav"
 filepath_legend = "./references/data-dictionaries/survey_mc_legend.csv"
+filepath_reorg = paste0("./references/data-dictionaries/", 
+                   "Current Position with BU and Org Hierarchy - WES 2018.csv")
 
 # File output paths
 filepath_out_questions = "./data/processed/tidy_quant_questions.csv"
@@ -119,8 +122,70 @@ df_info <- df_info %>%
                              levels = c("<3", "3-9", "10-19", "20+")))
 
 
-# Work needs to be done to clean Organization inconsistencies, LEVEL1_NAME,
-# LEVEL2_NAME, WESJOBCLASGRP etc.
+
+###############################################################################
+# Map correct Organization labels by Position number over time                #
+###############################################################################
+
+# Data dictionary to help with organization mapping
+df_reorg_legend <- read_csv(filepath_reorg)
+
+# Relevant columns to select for reorganization
+col_reorg <- df_legend %>% 
+  filter(category %in% c('BC Stats Background', 'Sensitive Info')) %>% 
+  filter(str_detect(original_column_name, "LEVEL") |
+         str_detect(original_column_name, "CURPOS") |
+         str_detect(original_column_name, "ORGANIZATION") |
+         str_detect(original_column_name, "DEPTID") |
+         original_column_name == 'USERID') %>% 
+  pull(original_column_name)
+
+# Tidy the Dataframe, Correct/Fill In missing Position Numbers, and Cross
+# Reference the reogranization legend based on Position number
+df_reorg <- df_spss_labeled %>% 
+  select(col_reorg) %>% 
+  gather(-USERID, key = "original_column_name", value = "temp_val") %>% 
+  left_join(df_legend, by = "original_column_name") %>% 
+  select(USERID, new_column_name, survey_year, temp_val) %>% 
+  spread(key = new_column_name, value = temp_val) %>% 
+  ## NEED TO JOIN 2007-2009 POSITION NUMBERS HERE
+  mutate_at(vars(CURPOSDESC:ORGANIZATION), str_squish) %>% 
+  mutate(CURPOSNUM = str_pad(CURPOSNUM, width = 8, side = "left",
+                             pad = "0")) %>% 
+  group_by(USERID, CURPOSDESC) %>% 
+  mutate(CURPOSNUM = na.locf(CURPOSNUM, fromLast = TRUE, na.rm = FALSE)) %>% 
+  left_join(df_reorg_legend, by = c("CURPOSNUM" = "POSITION NBR")) %>% 
+  ungroup()
+
+# Based off the data dictionary, map the correct organization name
+df_reorg <- df_reorg %>%
+  mutate(New_Org = case_when(
+    Level1 == "Public Guardian & Trustee"                   ~ "Public Guardian and Trustee",
+    Level1 == "Emergency Management BC"                     ~ "Emergency Management BC",
+    Level1 == "Liquor Control & Licensing"                  ~ "Attorney General",
+    Level1 == "Corporate Management Services"               ~ "Public Safety and Solicitor General",
+    Organization == "Natural Gas Development"               ~ "Energy, Mines and Petroleum Resources",
+    Organization == "Housing"                               ~ "Municipal Affairs and Housing",
+    DEPTID.x == "125-8002"                                  ~ "Municipal Affairs and Housing",
+    DEPTID.x == "125-8004"                                  ~ "Municipal Affairs and Housing",
+    DEPTID.x == "125-8006"                                  ~ "Municipal Affairs and Housing",
+    DEPTID.x == "125-8007"                                  ~ "Municipal Affairs and Housing",
+    DEPTID.x == "125-8009"                                  ~ "Municipal Affairs and Housing",
+    `Business Unit Description` == "Ministry of Justice AG" ~ "Attorney General",
+    `Business Unit Description` == "Ministry of Justice SG" ~ "Public Safety and Solicitor General",
+    `Business Unit Description` == "Env Assessment Office"  ~ "Environmental Assessment Office",
+    Organization == "Job, Trade and Technology"             ~ "Jobs, Trade and Technology",
+    Organization == "Citizens Services"                     ~ "Citizens' Services",
+    is.na(CURPOSNUM)                                        ~ "",
+    TRUE                                                    ~ as.character(Organization))) %>%
+  select(USERID, survey_year, CURPOSNUM, DEPTID.x, ORGANIZATION, New_Org)
+
+# Fill in Missing Oraganization Names
+df_reorg$New_Org[df_reorg$New_Org == ""] <- NA
+df_reorg <- df_reorg %>% 
+  group_by(USERID, ORGANIZATION) %>% 
+  mutate(New_Org = na.locf(New_Org, fromLast = TRUE, na.rm = FALSE)) 
+  
 
 
 ###############################################################################
