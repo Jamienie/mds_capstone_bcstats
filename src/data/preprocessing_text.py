@@ -17,7 +17,17 @@ import numpy as np
 
 
 def clean_text(x):
+    '''Replace punctuations in a string with spaces or nothing.
+    Useful for pretrained embeddings.
 
+    Parameters
+    ----------
+    x : str
+
+    Returns
+    -------
+    x : a string with cleaned punctuations
+    '''
     x = str(x)
     for punct in "/-'":
         x = x.replace(punct, ' ')
@@ -30,7 +40,17 @@ def clean_text(x):
 
 
 def clean_numbers(x):
+    '''Replaces numbers greater than 9 with # for each digit.
+    Ex. 150 becomes ###. This is useful for pretrained embeddings.
 
+    Parameters
+    ----------
+    x : str
+
+    Returns
+    -------
+    x : a string with clean numbers
+    '''
     x = re.sub('[0-9]{5,}', '#####', x)
     x = re.sub('[0-9]{4}', '####', x)
     x = re.sub('[0-9]{3}', '###', x)
@@ -75,6 +95,17 @@ mispellings, mispellings_re = _get_mispell(mispell_dict)
 
 
 def replace_typical_misspell(text):
+    '''Replace common misspellings in a string with correct spelling.
+    Useful for pretrained embeddings.
+
+    Parameters
+    ----------
+    x : str
+
+    Returns
+    -------
+    x : a string with corrected spelling
+    '''
     def replace(match):
         return mispellings[match.group(0)]
 
@@ -82,6 +113,16 @@ def replace_typical_misspell(text):
 
 
 def remove_stopwords(sentences):
+    '''Removes common stopwords from a tokenized list of words
+
+    Parameters
+    ----------
+    x : list of words
+
+    Returns
+    -------
+    x : list of words with stop words removed
+    '''
     to_remove = ['a', 'to', 'of', 'and']
 
     sentences_re = [[word for word in sentence if word not in to_remove]
@@ -90,7 +131,75 @@ def remove_stopwords(sentences):
     return sentences_re
 
 
+def preprocess_for_embed(text, embeddings_index, split=True):
+    '''Preprocess text data from a dataframe based on the pretrained embedding
+
+    Parameters
+    ----------
+    text : Pandas series object
+    embeddings_index: The name of the pretrained embedding
+
+    Returns
+    -------
+    text : list of tokenized words for each comment
+    '''
+    if embeddings_index in ['glove_wiki', 'glove_twitter', 'w2v_base_model']:
+        text = text.apply(lambda x: clean_text(x)) \
+                   .apply(lambda x: replace_typical_misspell(x)) \
+                   .apply(lambda x: clean_numbers(x)) \
+                   .apply(lambda x: x.lower())
+
+        if split:
+            text = remove_stopwords(text.str.split())
+        return text
+
+    if embeddings_index == 'w2v_google_news':
+        text = text.apply(lambda x: clean_text(x)) \
+                   .apply(lambda x: replace_typical_misspell(x)) \
+                   .apply(lambda x: clean_numbers(x))
+
+        if split:
+            text = remove_stopwords(text.str.split())
+        return text
+
+    else:
+        text = text.apply(lambda x: clean_text(x)) \
+                   .apply(lambda x: replace_typical_misspell(x))
+
+        if split:
+            text = remove_stopwords(text.str.split())
+        return text
+
+
+def preprocess_for_bow(text):
+    '''Preprocess text data for the bag of words model
+
+    Parameters
+    ----------
+    text : Pandas series object
+
+    Returns
+    -------
+    text : numpy array
+    '''
+    text = text.apply(lambda x: clean_text(x)) \
+               .apply(lambda x: replace_typical_misspell(x))
+
+    return np.array(text)
+
+
 def balance_themes(X, Y):
+    '''Balances arrays to have roughly the same number of comments for each
+    class
+
+    Parameters
+    ----------
+    X : numpy array with comment text
+
+    Returns
+    -------
+    Y : numpy array with comment labels
+    '''
     counts = np.sum(Y, axis=0)
 
     for i in range(Y.shape[1]):
