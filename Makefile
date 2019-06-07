@@ -23,19 +23,21 @@ DESEN_FILES = data/interim/desensitized_qualitative-data2015.csv data/interim/de
 RAW = data/raw/WES2015_Final_Qual_Results.xlsx data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
 QUAL_TEST = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv
 QUAL_TRAIN = data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
+QUAL = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
 
 # 1. Desensitization text - identify sensitive text (people's names) and remove the comments entirely
-# usage: make ata/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
+# usage: make data/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
 $(DESEN_FILES) : src/data/sensitive_text.py
 		python src/data/remove_sensitive_data.py $(RAW) $(DESEN_FILES)
 
 # 2. Read in 2015 and 2018 desensitized qualitative data. Split for test/train
-$(QUAL_TEST) $(QUAL_TRAIN) : $(DESEN_FILES) src/data/split_qual_data.py 
-		python src/data/split_qual_data.py $(DESEN_FILES)
-		$(QUAL_TEST) $(QUAL_TRAIN)
+# usage: make data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
+$(QUAL) : $(DESEN_FILES) src/data/split_qual_data.py 
+		python src/data/split_qual_data.py $(DESEN_FILES) $(QUAL)
 
 # 3. combine 2015 and 2018 datasets into one csv file
-data/interim/qual_combined_train.csv: $(QUAL_TRAIN) src/data/make_qual_dataset.py 
+# usage: make data/interim/qual_combined_train.csv
+data/interim/qual_combined_train.csv : src/data/make_qual_dataset.py 
 		python src/data/make_qual_dataset.py $(QUAL_TRAIN) data/interim/qual_combined_train.csv
         
 ###########################################################################
