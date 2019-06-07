@@ -4,7 +4,7 @@
 #
 # Purpose: This script is use to automate our data analysis project pipline
 # Useage:
-# 		- make <specific script name>
+# 		- make <specific file name>
 #		- make all
 #		- make clean
 
@@ -16,14 +16,16 @@
 all: reports/final_report.md
 
 ###########################################################################
-# Run the three scripts step by step to prepare datasets for analysis
+# Run the three scripts step by step to prepare datasets for
+# (exploratory data) analysis 
 ###########################################################################
 
 DESEN_FILES = data/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
-RAW = data/raw/WES2015_Final_Qual_Results.xlsx data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
+RAW = data/raw/WES2015_Final_Qual_Results.xlsx data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx
 QUAL_TEST = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv
 QUAL_TRAIN = data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
 QUAL = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
+TIDY_FILES = data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA.sav references/data-dictionaries/survey_mc_legend.csv references/data-dictionaries/Current\ Position\ with\ BU\ and\ Org\ Hierarchy\ -\ WES\ 2018.csv
 
 # 1. Desensitization text - identify sensitive text (people's names) and remove the comments entirely
 # usage: make data/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
@@ -40,18 +42,39 @@ $(QUAL) : $(DESEN_FILES) src/data/split_qual_data.py
 data/interim/qual_combined_train.csv : src/data/make_qual_dataset.py 
 		python src/data/make_qual_dataset.py $(QUAL_TRAIN) data/interim/qual_combined_train.csv
         
+# 4. Tidy's the raw quanititative data into two csv files, one with the scores
+# on the multiple choice questions and engagement model, the second details
+# the demographic and other employee info
+# usage: make data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv 
+data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv :$(TIDY_FILES) src/data/tidy_quantitative_data.R      
+		Rscript src/data/tidy_quantitative_data.R $(TIDY_FILES) data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv      
+ 
 ###########################################################################
 # Run the these scripts step by step to qualitative data classification
 ###########################################################################
 
+SPLIT_FILES = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
+X_FIles = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv
+
+# 1. Preprocessing and Data Preperation 2018 comment data
+# usage: make data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
+$(SPLIT_FILES) : data/interim/train_2018-qualitative-data.csv src/models/preprocessing_data_preperation.py 
+		python src/models/preprocessing_data_preperation.py data/interim/train_2018-qualitative-data.csv $(SPLIT_FILES)
+
+# 2. Build Bag of Words
+# usage: make data/interim/X_train_bow.csv data/interim/X_valid_bow.csv
+data/interim/X_train_bow.csv data/interim/X_valid_bow.csv : $(X_FILES) src/data/preprocessing_text.py src/models/bow.py
+		python src/models/bow.py $(X_FILES) data/interim/X_train_bow.csv data/interim/X_valid_bow.csv        
+
+
+# 3. Build LSTM model
 
 
 #####################################
 # Generate report
 #####################################
 
-doc/vancouver_bike_report.md : doc/vancouver_bike_report.Rmd results/figures/viz_exploratory.png results/figures/bike_boxplot.png results/analysis_summary.csv
-	Rscript -e "rmarkdown::render('doc/vancouver_bike_report.Rmd')"
+
 
 #####################################
 # Remove all files
