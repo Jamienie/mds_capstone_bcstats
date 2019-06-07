@@ -50,11 +50,13 @@ data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.c
 		Rscript src/data/tidy_quantitative_data.R $(TIDY_FILES) data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv      
  
 ###########################################################################
-# Run the these scripts step by step to qualitative data classification
+# Run the these scripts step by step to build baseline model 
+# for text classification -- Bag of Words with LinearSVC
 ###########################################################################
 
 SPLIT_FILES = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
 X_FIles = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv
+BOW_FILES = data/interim/X_train_bow.npz data/interim/X_valid_bow.npz 
 
 # 1. Preprocessing and Data Preperation 2018 comment data
 # usage: make data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
@@ -62,12 +64,20 @@ $(SPLIT_FILES) : data/interim/train_2018-qualitative-data.csv src/models/preproc
 		python src/models/preprocessing_data_preperation.py data/interim/train_2018-qualitative-data.csv $(SPLIT_FILES)
 
 # 2. Build Bag of Words
-# usage: make data/interim/X_train_bow.csv data/interim/X_valid_bow.csv
-data/interim/X_train_bow.csv data/interim/X_valid_bow.csv : $(X_FILES) src/data/preprocessing_text.py src/models/bow.py
-		python src/models/bow.py $(X_FILES) data/interim/X_train_bow.csv data/interim/X_valid_bow.csv        
+# usage: make data/interim/X_train_bow.npz data/interim/X_valid_bow.npz
+$(BOW_FILES) : $(X_FILES) src/data/preprocessing_text.py src/models/bow.py
+		python src/models/bow.py $(X_FILES) $(BOW_FILES)        
+
+# 3. Build LinearSVC model
+# usage: make data/interim/Y_pred_bow.csv
+data/interim/Y_pred_bow.csv: $(BOW_FILES) data/interim/Y_train_2018-qualitative-data.csv src/models/linearsvc.py
+		python src/models/linearsvc.py $(BOW_FILES) data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_pred_bow.csv
 
 
-# 3. Build LSTM model
+###########################################################################
+# Run the these scripts step by step to build deep learning model with 
+# pre-trained embeddings for text classification -- Keras model
+###########################################################################
 
 
 #####################################
