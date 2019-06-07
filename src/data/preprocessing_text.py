@@ -2,7 +2,7 @@
 # Authors: Aaron Quinton
 # Date: 2019-05-22
 
-# Many functions and the overall workflow have been built from Kaggle Kernel
+# Many functions and the overall workflow have been built from a Kaggle Kernel
 # written by "Dieter"
 # https://www.kaggle.com/christofhenkel/how-to-preprocessing-when-using-embeddings
 
