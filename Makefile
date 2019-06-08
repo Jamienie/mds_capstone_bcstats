@@ -42,13 +42,6 @@ $(QUAL) : $(DESEN_FILES) src/data/split_qual_data.py
 data/interim/qual_combined_train.csv : src/data/make_qual_dataset.py 
 		python src/data/make_qual_dataset.py $(QUAL_TRAIN) data/interim/qual_combined_train.csv
         
-# 4. Tidy's the raw quanititative data into two csv files, one with the scores
-# on the multiple choice questions and engagement model, the second details
-# the demographic and other employee info
-# usage: make data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv 
-data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv :$(TIDY_FILES) src/data/tidy_quantitative_data.R      
-		Rscript src/data/tidy_quantitative_data.R $(TIDY_FILES) data/processed/tidy_quant_questions.csv data/processed/tidy_quant_demographics.csv      
- 
 ###########################################################################
 # Run the these scripts step by step to build baseline model 
 # for text classification -- Bag of Words with LinearSVC
@@ -78,6 +71,8 @@ data/interim/Y_pred_bow.csv: $(BOW_FILES) data/interim/Y_train_2018-qualitative-
 # Run the these scripts step by step to build deep learning model with 
 # pre-trained embeddings for text classification -- Keras model
 ###########################################################################
+
+
 
 
 #####################################
