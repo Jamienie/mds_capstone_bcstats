@@ -1,22 +1,67 @@
 # sensitive_text.py
-# Author: Aaron Quinton
+# Author: Fan Nie, Ayla Pearson, Aaron Quinton
 # Date: 2019-05-16
 
-# USAGE: This script defines a function to identify comments that contain
-# senstive information. To use you need to have the NationalNames.csv on your
-# local computer. The csv can be downloaded on kaggle at the following link:
+# General USAGE:
+# This script defines functions to identify comments that contain senstive
+# information. To use you need to have the NationalNames.csv on your local
+# computer and saved in the project directory:
+# "./references/data-dictionaries/NationalNames.csv"
+# The csv can be downloaded on kaggle at the following link:
 # https://www.kaggle.com/kaggle/us-baby-names#NationalNames.csv
 
+# Makefile USAGE:
+# For the 2018 data:
+'''
+python src/data/sensitive_text.py
+'''
+# For the 2015 data:
+'''
+python src/data/sensitive_text.py \
+--input_xlsx data/raw/WES2015_Final_Qual_Results.xlsx \
+--output_csv data/interim/desensitized_qualitative-data2015.csv \
+--skiprows 0
+'''
+
+# Import Modules
 import pandas as pd
 import spacy
+import argparse
+
+
+# Default File paths:
+# Input
+filepath_in = "data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
+filepath_out = "data/interim/desensitized_qualitative-data2018.csv"
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Remove sensitive comments'
+                                     'from excel WES survey and write to csv')
+
+    parser.add_argument('--input_xlsx', '-i', type=str, dest='input_xlsx',
+                        action='store', default=filepath_in,
+                        help='the input xlsx file')
+
+    parser.add_argument('--output_csv', '-o', type=str, dest='output_csv',
+                        action='store', default=filepath_out,
+                        help='the output csv file')
+
+    parser.add_argument('--skiprows', type=int, dest='skiprows',
+                        action='store', default='1',
+                        help='Number of rows to skip when reading xlsx')
+
+    args = parser.parse_args()
+    return args
+
+
+###############################################################################
+# Create name_check list based on US Census data to be used in the            #
+# sensitive_text function                                                     #
+###############################################################################
 
 # File Paths to read in datadictionary
 filepath_names = "./references/data-dictionaries/NationalNames.csv"
-
-
-###############################################################################
-# Create name_check list based on US Census data to be used in the function   #
-###############################################################################
 
 # Read in data dictionary
 df_names = pd.read_csv(filepath_names)
@@ -40,11 +85,7 @@ for missing_name in missing_names:
     name_check.append(missing_name)
 
 
-###############################################################################
-# Define function to check if text is sensitive and needs to be removed       #
-###############################################################################
-
-def sensitive_index(comments):
+def find_sensitive_text(comments):
     """Return a list of indices identifying comments with sensitive information
     given a list of comments"""
 
@@ -72,3 +113,25 @@ def sensitive_index(comments):
                 break
 
     return sensitive_person_index
+
+
+def remove_sensitive_text(filepath, skiprows):
+
+    df = pd.read_excel(filepath, skiprows=skiprows)
+    comments = df.iloc[:, 1]
+    sensitive_indices = find_sensitive_text(comments)
+    df = df.drop(index=sensitive_indices)
+
+    return(df)
+
+
+###############################################################################
+# Run code as part of make file procedure                                     #
+###############################################################################
+
+
+if __name__ == "__main__":
+
+    args = get_arguments()
+    df = remove_sensitive_text(args.input_xlsx, args.skiprows)
+    df.to_csv(args.output_csv, index=False)
