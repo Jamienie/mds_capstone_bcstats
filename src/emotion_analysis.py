@@ -601,16 +601,55 @@ def display_top_emotions(data, emotion, n, order=False, normalize=True):
         data = normalize_scores(data)
     # sort values
     data = data.sort_values(by=emotion, ascending=order)
+    # remove user ID for printing 
+    data = data.drop("USERID", axis=1)
     # return selected number
     return data.head(n)
     
+    
+    
+def list_emotion_present_in_data(data):
+    """
+    Inputs the data frame and generates a list of which emotions 
+    are present
+    
+    Parameters:
+    -----------
+    data: dataframe
+        Dataframe with any of the columns anger, joy, fear and sad. 
+    Returns
+    -------
+    Returns a list of the emotions names present
+    
+    """
+    
+    emotions_present = []
+    if "anger" in data.columns:
+        emotions_present.append("anger")
+        
+    if "fear" in data.columns:
+        emotions_present.append("fear")
+        
+    if "sad" in data.columns:
+        emotions_present.append("sad")
+
+    if "joy" in data.columns:
+        emotions_present.append("joy")
+    
+    return emotions_present
+
+
+
+def examine_emotion_scoring(data, emotion, lexicon):
+
+    return 
 
     
-    
-def examine_emotion_scoring(data, emotion, lexicon):
+def examine_emotion_scoring_randomized(data, emotion, lexicon, index=None):
     """
-    Prints comments, emotion values, related words and thier scores. This 
-    is used to help understand the specifics 
+    Filter to which emotion the comment is related to and randomly generate examples
+    with the comment, emotion values, words and related scores. To print this
+    detail for a specific row use the function examine_emotion_scoring
     
     Parameters
     ----------
@@ -634,73 +673,118 @@ def examine_emotion_scoring(data, emotion, lexicon):
     
     """
     # create a copy to not overwrite orginal dataframe
+   
+    if emotion not in data.columns:
+        raise TypeError("emotion not present in dataframe")
+    
     df = data.copy()
     # get the max emotion and one hot-encoding
-    df = df[((df['anger']!=0)|(df['fear']!=0)|(df['joy']!=0)|(df['sad']!=0))].copy()
-    df['encode'] = df[["anger", "fear", "sad", "joy"]].idxmax(1).tolist()
-    df_one_hot = pd.concat([df, pd.get_dummies(df['encode'], prefix="c")], axis=1)    
-    df_one_hot = df_one_hot[['USERID', 'code', 'diff', 'text', 'anger',
-                             'fear', 'sad', 'joy', 'c_anger', 'c_fear', 'c_sad', 'c_joy']]
+    df = filter_emotionless_comments(df)
+    emotion_list = list_emotion_present_in_data(data)
+    df['encode'] = df[emotion_list].idxmax(1).tolist()
+    df_one_hot = pd.concat([df, pd.get_dummies(df['encode'], prefix="")], axis=1)        
+    df_one_hot = df_one_hot.drop(["encode", "USERID"], axis=1)
+    
     # create dataframes for filter condition
     if emotion == "anger":
-        df1 = df_one_hot[df_one_hot['c_anger'] == 1]
+        df1 = df_one_hot[df_one_hot['_anger'] == 1]
         row = random.randint(1, df1.shape[0])
     if emotion == "fear":
-        df1 = df_one_hot[df_one_hot['c_fear'] == 1]
+        df1 = df_one_hot[df_one_hot['_fear'] == 1]
         row = random.randint(1, df1.shape[0])
     if emotion == "joy":
-        df1 = df_one_hot[df_one_hot['c_joy'] == 1]
+        df1 = df_one_hot[df_one_hot['_joy'] == 1]
         row = random.randint(1, df1.shape[0])
     if emotion == "sad":
-        df1 = df_one_hot[df_one_hot['c_sad'] == 1]
+        df1 = df_one_hot[df_one_hot['_sad'] == 1]
         row = random.randint(1, df1.shape[0])
     # print row of dataframe
-    display(df1.iloc[[row]])
-    print("")
-    print("Comment \n",  df1['text'].tolist()[row])
-    single_comment = nlp(df1['text'].tolist()[row])
+    
+    if type(index) == int:
+        if index not in df1.index.values.tolist():
+            raise TypeError("the index value is not present in the choosen emotion")
+    
+    if type(index) == int:
+        # index to specific row index
+        series = df1.loc[index]
+        # convert back to dataframe for nice printing
+        df1_display = pd.DataFrame(data = series.values.reshape(1,series.shape[0]), 
+                            columns = series.index)
+        df1_display = df1_display.set_index(pd.Index([index]))
+        display(df1_display)
+           
+    elif index == None:
+        display(df1.iloc[[row]])
     print("\n")
-    # create dataframes for each emotions 
-    anger = lexicon[lexicon['AffectDimension']=='anger']
-    fear = lexicon[lexicon['AffectDimension']=='fear']
-    sad = lexicon[lexicon['AffectDimension']=='sadness']
-    joy = lexicon[lexicon['AffectDimension']=='joy']
+    print("Comment")
+    print("-------")
+    
+    if type(index) == int:
+        print(df1.loc[index]["text"])
+        single_comment = nlp(df1.loc[index]["text"])
+    elif index == None:
+        print(df1['text'].tolist()[row])
+        single_comment = nlp(df1['text'].tolist()[row])
+   
+    print("\n")
     # prints related words for each emotion
-    matches_anger = create_emotion_matcher(anger)(single_comment)
-    print("ANGER")
+    if "anger" in emotion_list:
+        anger = lexicon[lexicon['AffectDimension']=='anger']
+        matches_anger = create_emotion_matcher(anger)(single_comment)
+        print("ANGER")
+        
+        print_word_score(anger, matches_anger, single_comment)
+    if "fear" in emotion_list:
+        fear = lexicon[lexicon['AffectDimension']=='fear']
+        matches_fear = create_emotion_matcher(fear)(single_comment)
+        print("FEAR")
+        print_word_score(fear, matches_fear, single_comment)        
+    if "joy" in emotion_list:
+        joy = lexicon[lexicon['AffectDimension']=='joy']
+        matches_joy = create_emotion_matcher(joy)(single_comment)
+        print("JOY")
+        print_word_score(joy, matches_joy, single_comment)           
+    if "sad" in emotion_list:
+        sad = lexicon[lexicon['AffectDimension']=='sadness']
+        matches_sad = create_emotion_matcher(sad)(single_comment)
+        print("SAD") 
+        print_word_score(sad, matches_sad, single_comment) 
+    
+    
+    
+    
+    
+    
+    
+    
+def print_word_score(lexicon, matcher, comment):
+    """
+    Prints the word and its score
+    
+    Parameters
+    ----------
+    
+    Returns
+    -------
+    Prints the
+    
+    """
     print("-----")
-    for match_id, start, end in matches_anger:       
+    for match_id, start, end in matcher:       
         words = []
-        span = str(single_comment[start:end])
-        value = anger[anger["term"] == span]['score'].tolist()[0]
+        span = str(comment[start:end])
+        value = lexicon[lexicon["term"] == span]['score'].tolist()[0]
         print("{0} {1:.3f}".format(span, value))
     print("\n")
-    matches_fear = create_emotion_matcher(fear)(single_comment)
-    print("FEAR")
-    print("----")
-    for match_id, start, end in matches_fear:       
-        words = []
-        span = str(single_comment[start:end])
-        value = fear[fear["term"] == span]['score'].tolist()[0]
-        print("{0} {1:.3f}".format(span, value))  
-    print("\n")
-    matches_sad = create_emotion_matcher(sad)(single_comment)
-    print("SAD") 
-    print("---")
-    for match_id, start, end in matches_sad:       
-        words = []
-        span = str(single_comment[start:end])
-        value = sad[sad["term"] == span]['score'].tolist()[0]
-        print("{0} {1:.3f}".format(span, value))  
-    print("\n")    
-    matches_joy = create_emotion_matcher(joy)(single_comment)
-    print("JOY")
-    print("---")
-    for match_id, start, end in matches_joy:       
-        words = []
-        span = str(single_comment[start:end])
-        value = joy[joy["term"] == span]['score'].tolist()[0]
-        print("{0} {1:.3f}".format(span, value))
+    
+    
+    
+    
+    
+    
+    
+    
+    
         
 def summary_number_comment(data, threshold, include=False):
     """
