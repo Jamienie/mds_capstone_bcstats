@@ -7,8 +7,9 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import sklearn.metrics as metrics
-
+from sklearn.metrics import roc_curve, auc
 
 def theme_results(Ytrue, Ypred):
     '''Calculate accuracies for theme classification
@@ -23,19 +24,10 @@ def theme_results(Ytrue, Ypred):
 
     Returns
     -------
-    results : a dataframe of evaluation metrics by class
+    overall_results : dataframes of overall evaluation metrics
+
+    theme_results : dataframe of evaluation metrics by class
     '''
-
-    # Calculate overall accuarcies to print to screen
-    overall_accuracy = metrics.accuracy_score(Ytrue, Ypred)
-    hamming_loss = metrics.hamming_loss(Ytrue, Ypred)
-    hamming_loss_zeros = metrics.hamming_loss(Ytrue,
-                                              np.zeros((Ytrue.shape[0],
-                                                        Ytrue.shape[1])))
-
-    print('Overall Accuracy:', round(overall_accuracy, 4),
-          '\nHamming Loss:', round(hamming_loss, 4),
-          '\nHamming Loss (pred. zeros):', round(hamming_loss_zeros, 4))
 
     # Calculate individual accuracies and evaluation metrics for each class
     labels = ['CPD', 'CB', 'EWC', 'Exec', 'FWE', 'SP', 'RE', 'Sup', 'SW',
@@ -57,16 +49,32 @@ def theme_results(Ytrue, Ypred):
         precision.append(metrics.precision_score(Ytrue[:, i], Ypred[:, i]))
         recall.append(metrics.recall_score(Ytrue[:, i], Ypred[:, i]))
 
-    results = pd.DataFrame({'Label': labels,
-                            'Y_count': Y_count,
-                            'Pred_count': pred_count,
-                            'Error': error,
-                            'Dummy_Diff': dummy_diff,
-                            'Accuarcy': accuracies,
-                            'Precision': precision,
-                            'Recall': recall})
+    theme_results = pd.DataFrame({'Label': labels,
+                                  'Y_count': Y_count,
+                                  'Pred_count': pred_count,
+                                  'Error': error,
+                                  'Dummy_Diff': dummy_diff,
+                                  'Accuarcy': accuracies,
+                                  'Precision': precision,
+                                  'Recall': recall})
 
-    return results
+    # Calculate overall metrics
+    overall_accuracy = round(metrics.accuracy_score(Ytrue, Ypred), 4)
+    hamming_loss = round(metrics.hamming_loss(Ytrue, Ypred), 4)
+    tp = theme_results.Precision.multiply(theme_results.Pred_count)
+    micro_avg_precision = round(tp.sum()/theme_results.Pred_count.sum(), 4)
+    micro_avg_recall = round(tp.sum()/theme_results.Y_count.sum(), 4)
+
+    overall_results = pd.DataFrame({'Metric': ['Overall Accuracy',
+                                               'Hamming Loss',
+                                               'Micro-average Precision',
+                                               'Micro-average Recall'],
+                                    'Value': [overall_accuracy,
+                                              hamming_loss,
+                                              micro_avg_precision,
+                                              micro_avg_recall]})
+
+    return overall_results, theme_results
 
 
 def subtheme_results(Ytrue, Ypred):
@@ -239,3 +247,76 @@ def investigate_results(df, Y_true, Y_pred):
                              index in df_results.base_index]
 
     return df_results
+
+
+def plot_theme_ROC(Y_true, Y_pred, title='Multi-class ROC', save_fpath=None):
+
+    themes = ['CPD', 'CB', 'EWC', 'Exec', 'FWE', 'SP',
+              'RE', 'Sup', 'SW', 'TEPE', 'VMG', 'OTH']
+    fpr = {}
+    tpr = {}
+    roc_auc = {}
+
+    # Calculate binarized ROC curve metrics for each theme
+    for i, theme in enumerate(themes):
+        fpr[theme], tpr[theme], _ = metrics.roc_curve(y_true=Y_true[:, i],
+                                                      y_score=Y_pred[:, i])
+        roc_auc[theme] = metrics.auc(fpr[theme], tpr[theme])
+
+    df_roc_auc = pd.DataFrame({'keys': list(roc_auc.keys()),
+                               'values': list(roc_auc.values())})
+    df_roc_auc = df_roc_auc.sort_values(by='values', ascending=False)
+
+    # Plot ROC curve
+    plt.figure()
+    colors = plt.get_cmap('tab20c').colors
+    for i, color in zip(df_roc_auc['keys'], colors):
+        plt.plot(fpr[i], tpr[i], color=color, lw=2,
+                 label='{0} (area = {1:0.3f})'
+                 ''.format(i, roc_auc[i]))
+
+    plt.plot([0, 1], [0, 1], 'k--', lw=2)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(title)
+    plt.legend(loc="lower right")
+    if save_fpath is not None:
+        plt.savefig(save_fpath)
+    plt.show()
+
+    return None
+
+
+def plot_average_ROC_by_embed(Y_true, Y_pred, title='Average ROC',
+                              save_fpath=None):
+
+    fpr_avg = {}
+    tpr_avg = {}
+    roc_auc_avg = {}
+    colors = plt.get_cmap('tab10').colors
+
+    plt.figure()
+    for embed, color in zip(Y_pred.keys(), colors):
+        fpr_avg[embed], tpr_avg[embed], _ = roc_curve(Y_true.ravel(),
+                                                      Y_pred[embed].ravel())
+        roc_auc_avg[embed] = auc(fpr_avg[embed], tpr_avg[embed])
+
+        plt.plot(fpr_avg[embed], tpr_avg[embed],
+                 label=embed + '(area = {0:0.3f})'
+                       ''.format(roc_auc_avg[embed]),
+                 color=color, linewidth=2)
+
+    plt.plot([0, 1], [0, 1], 'k--', lw=2)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Average ROC')
+    plt.legend(loc="lower right")
+    if save_fpath is not None:
+        plt.savefig(save_fpath)
+    plt.show()
+
+    return None
