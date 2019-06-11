@@ -50,8 +50,10 @@ R
 
 #### Data  
 To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require approval. Please reach out to one of the authors of this repository for more information.
-- `data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx`
-- `data/raw/WES 2007-2018 LONGITUDINAL DATA.sav`  
+```
+- data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
+- data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
+```
 
 To illustrate the project workflow we have provided sanitized sample files in the `data/raw/` directory.
 
@@ -59,16 +61,22 @@ To illustrate the project workflow we have provided sanitized sample files in th
 The text classification model makes use of several pre-trained word embeddings. The required file paths and links to download are provided below:   
 
 Word2Vec [1] | Google News [[Link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit)]
-- `references/pretrained_embeddings.nosync/w2v/GoogleNews-vectors-negative300.bin`
+```
+ - references/pretrained_embeddings.nosync/w2v/GoogleNews-vectors-negative300.bin
+```
 
 FastText [2] | Common Crawl | Wikipedia [[Link](https://fasttext.cc/docs/en/english-vectors.html)]
-- `references/pretrained_embeddings.nosync/fasttext/crawl-300d-2M.vec`
-- `references/pretrained_embeddings.nosync/fasttext/wiki-news-300d-1M.vec`
+```
+- references/pretrained_embeddings.nosync/fasttext/crawl-300d-2M.vec
+- references/pretrained_embeddings.nosync/fasttext/wiki-news-300d-1M.vec
+```
 
 GloVe [3] | Wikipedia | Common Crawl | Twitter [[Link](https://nlp.stanford.edu/projects/glove/)]
-- `references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt`
-- `references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt`
-- `references/pretrained_embeddings.nosync/glove/glove.twitter.27B.200d.w2v.txt`
+```
+- references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt
+- references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt
+- references/pretrained_embeddings.nosync/glove/glove.twitter.27B.200d.w2v.txt
+```
 
 In order to use the GloVe embeddings they first need to be converted to w2v format. After downloading them from the link above you need to run the following script at the command line.
 ```
