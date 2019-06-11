@@ -8,14 +8,15 @@
 
 # Import modules
 import re
+import operator
 import numpy as np
+from tqdm import tqdm
+tqdm.pandas()
+
 
 ###############################################################################
-# Functions used for preprocessing punctuation, numbers, and misspellings and #
-# bootstrapping comment data to balance comments per theme label              #
+# Functions used for preprocessing punctuation, numbers, and misspellings     #
 ###############################################################################
-
-
 def clean_text(x):
     '''Replace punctuations in a string with spaces or nothing.
     Useful for pretrained embeddings.
@@ -183,7 +184,8 @@ def preprocess_for_bow(text):
     text : numpy array
     '''
     text = text.apply(lambda x: clean_text(x)) \
-               .apply(lambda x: replace_typical_misspell(x))
+               .apply(lambda x: replace_typical_misspell(x)) \
+               .apply(lambda x: x.lower())
 
     return np.array(text)
 
@@ -220,3 +222,35 @@ def balance_themes(X, Y):
         Y_balance = np.vstack((Y_balance, Y_array_to_append))
 
     return X_balance, Y_balance
+
+
+def build_vocab(sentences, verbose=True):
+    vocab = {}
+    for sent in tqdm(sentences, disable=(not verbose)):
+        for word in sent:
+            try:
+                vocab[word] += 1
+            except KeyError:
+                vocab[word] = 1
+    return vocab
+
+
+def check_coverage(vocab, embeddings_index):
+    a = {}
+    oov = {}
+    k = 0
+    i = 0
+    for word in tqdm(vocab):
+        try:
+            a[word] = embeddings_index[word]
+            k += vocab[word]
+        except:
+            oov[word] = vocab[word]
+            i += vocab[word]
+            pass
+
+    vocab_coverage = len(a) / len(vocab)
+    text_coverage = k / (k + i)
+    sorted_x = sorted(oov.items(), key=operator.itemgetter(1))[::-1]
+
+    return vocab_coverage, text_coverage, sorted_x
