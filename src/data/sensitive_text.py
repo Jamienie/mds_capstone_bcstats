@@ -30,7 +30,6 @@ import argparse
 
 
 # Default File paths:
-# Input
 filepath_in = "data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
 filepath_out = "data/interim/desensitized_qualitative-data2018.csv"
 
@@ -85,6 +84,9 @@ for missing_name in missing_names:
     name_check.append(missing_name)
 
 
+###############################################################################
+# Define functions and set up script to run in command line                   #
+###############################################################################
 def find_sensitive_text(comments):
     """Return a list of indices identifying comments with sensitive information
     given a list of comments"""
@@ -126,10 +128,6 @@ def remove_sensitive_text(filepath, skiprows):
 
 
 ###############################################################################
-# Run code as part of make file procedure                                     #
-###############################################################################
-
-
 if __name__ == "__main__":
 
     args = get_arguments()
