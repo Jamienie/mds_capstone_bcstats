@@ -89,6 +89,12 @@ python src/models/run_classifier.py \
 
 Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 
+### Makefile Usage
+To Rerun the analysis in full and reproduce the models run the makefile at the command line
+
+```
+makefile
+```
 
 ## Navigating the Repository <a name="repo"></a>
 ```
