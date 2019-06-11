@@ -31,7 +31,7 @@ The BCStats ministry conducts a [Work Environment Survey](https://www2.gov.bc.ca
 2. Utilize data science tools to better understand the comments and investigate how they relate to the survey's multiple choice questions.
 
 ## Getting Started <a name = "getting_started"></a>
-The first step to reproduce this analysis or use the text classification model is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are to reproduce the analysis. To use the text classification model skip to the USAGE section below.
+The first step to reproduce this analysis or use the text classification model is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis and use the text classification model.
 
 ### Prerequisites
 
@@ -80,7 +80,14 @@ python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glov
 ```
 
 ## Usage <a name="usage"></a>
-To predict text classifications using the model you only need the software prerequisites listed above and can run this script at the command line:
+
+To Rerun the analysis in full and reproduce the models for prediction run the makefile at the command line
+
+```
+makefile
+```
+
+With the models trained you can quickly make text classifications by running the script at the command line:
 ```
 python src/models/run_classifier.py \
 --input_csv FILEPATH_IN
@@ -89,20 +96,11 @@ python src/models/run_classifier.py \
 
 Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 
-### Makefile Usage
-To Rerun the analysis in full and reproduce the models run the makefile at the command line
-
-```
-makefile
-```
-
 ## Navigating the Repository <a name="repo"></a>
+The correct folder structure is detailed below with all the directories. In the first directory level there is individual Readme files with additional information about the contents in each main folder.
+
 ```
 .
-├── CONDUCT.md
-├── Makefile
-├── README.md
-├── TEAMWORK.md
 ├── data
 │   ├── interim
 │   ├── processed
