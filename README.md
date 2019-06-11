@@ -7,7 +7,7 @@
 
 ---
 
-<p align="center"> As part of the [Masters of Data Science](https://masterdatascience.ubc.ca/) Program at UBC, we have partnered with BCStats to analyze their 2018 Work Environment Survey (WES) and to apply natural language processing on the open ended survey responses.
+<p align="center"> As part of the Masters of Data Science Program at UBC, we have partnered with BCStats to analyze their 2018 Work Environment Survey (WES) and to apply natural language processing on the open ended survey responses.
     <br>
 </p>
 
