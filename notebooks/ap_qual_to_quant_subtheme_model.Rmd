@@ -504,6 +504,21 @@ webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/a
 # split into 2 webshots due to table length
 # webshot("reports/figures/appendix_subtheme_desc.html", file =   "reports/figures/appendix_subtheme_desc1.png", cliprect = c(0,0, 600, 600), zoom=10)
 #webshot("reports/figures/appendix_subtheme_desc.html", file = "reports/figures/appendix_subtheme_desc2.png", cliprect = c(500,0, 600, 1000), zoom=10)
+
+```
+
+```{r theme and subtheme names, include=FALSE}
+
+appendix_legend <- appendix_subtheme %>%
+  rename(theme = Theme,
+         code = Code,
+         subtheme_description = Description)
+                  
+
+write_path = "./references/data-dictionaries/theme_subtheme_names.csv"
+
+write_csv(appendix_legend, write_path)
+
 ```
 
 
