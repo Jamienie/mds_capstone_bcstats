@@ -1,4 +1,4 @@
-# eval.py
+# evaluate_results.py
 # Author: Aaron Quinton
 # Date: 2019-05-20
 
@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sklearn.metrics as metrics
 from sklearn.metrics import roc_curve, auc
+
 
 def theme_results(Ytrue, Ypred):
     '''Calculate accuracies for theme classification
