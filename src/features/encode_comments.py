@@ -14,7 +14,7 @@ python src/features/encode_comments.py
 '''
 python src/features/encode_comments.py \
 --input_csv data/interim/test_2018-qualitative-data.csv \
---output_pickle data/processed/X_test_encoded.pickle \
+--output_pickle data/processed/X_test_encoded.pickle
 '''
 
 

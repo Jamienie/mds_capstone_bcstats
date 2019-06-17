@@ -1,4 +1,4 @@
-# conv1d.py
+# run_classifier.py
 # Author: Fan Nie, Ayla Pearson, Aaron Quinton
 # Date: 2019-06-09
 
