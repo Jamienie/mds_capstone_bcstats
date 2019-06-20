@@ -62,7 +62,7 @@ if __name__ == "__main__":
     comments = df.iloc[:, 1]
 
     # Load Vectorizer
-    with open('models/bow_vectorizer.pickle', 'rb') as handle:
+    with open('src/models/bow_vectorizer.pickle', 'rb') as handle:
         bow_vectorizer = pickle.load(handle)
 
     # Get sparse document-term matrix and save

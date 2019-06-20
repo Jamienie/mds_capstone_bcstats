@@ -46,7 +46,7 @@ def get_arguments():
                         action='store', default=filepath_out,
                         help='the output csv file')
 
-    parser.add_argument('--skiprows', type=int, dest='skiprows',
+    parser.add_argument('--skiprows', '-s', type=int, dest='skiprows',
                         action='store', default='1',
                         help='Number of rows to skip when reading xlsx')
 
