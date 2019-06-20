@@ -81,7 +81,7 @@ src/models/linearsvc_model.pickle : data/interim/train_2018-qualitative-data.csv
 
 
 #####################################
-# Generate report
+# Generate results
 #####################################
 
 
@@ -91,9 +91,11 @@ src/models/linearsvc_model.pickle : data/interim/train_2018-qualitative-data.csv
 #####################################
 
 clean:
-	rm -f data/interim/desensitized_qualitative-data2015.csv
 	rm -f data/interim/desensitized_qualitative-data2018.csv
-	rm -f data/interim/test_2015-qualitative-data.csv 
 	rm -f data/interim/test_2018-qualitative-data.csv
-	rm -f data/interim/train_2015-qualitative-data.csv
 	rm -f data/interim/train_2018-qualitative-data.csv
+	rm -f src/models/bow_vectorizer.pickle
+	rm -f data/processed/X_train_bow.npz
+	rm -f data/processed/X_test_bow.npz
+	rm -f src/models/linearsvc_model.pickle    
+    
