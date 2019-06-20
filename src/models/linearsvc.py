@@ -41,5 +41,5 @@ if __name__ == "__main__":
 
     linearsvc_model = train_linearsvc(X_train, Y_train)
 
-    with open('./models/linearsvc_model.pickle', 'wb') as handle:
+    with open('src/models/linearsvc_model.pickle', 'wb') as handle:
         pickle.dump(linearsvc_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
