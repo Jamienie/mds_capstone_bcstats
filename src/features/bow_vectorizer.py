@@ -58,5 +58,5 @@ if __name__ == "__main__":
 
     bow_vectorizer = get_bow_vectorizer(comments)
 
-    with open("models/bow_vectorizer.pickle", 'wb') as handle:
+    with open("src/models/bow_vectorizer.pickle", 'wb') as handle:
         pickle.dump(bow_vectorizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
