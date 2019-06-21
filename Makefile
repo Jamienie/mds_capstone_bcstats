@@ -77,7 +77,22 @@ src/models/linearsvc_model.pickle : data/interim/train_2018-qualitative-data.csv
 # pre-trained embeddings for text classification -- ensamble method
 ###########################################################################
 
+EMBEDDINGS = referencesp/retrained_embeddings/glove/glove.840B.300d.w2v.txt
+referencesp/retrained_embeddings/glove/glove.twitter.27B.200d.w2v.txt
+referencesp/retrained_embeddings/glove/glove.6B.300d.w2v.txt 
+referencesp/retrained_embeddings/fasttext/crawl-300d-2M.vec 
+referencesp/retrained_embeddings/fasttext/wiki-news-300d-1M.vec 
+w2v/GoogleNews-vectors-negative300.bin
 
+EMBED_PICKLES = src/models/embed_tokenizers.pickle src/models/embed_matrices.pickle
+
+# 1. Preprocess text, fit tokenizers, and build embedding matrices
+# usage: make src/models/embed_tokenizers.pickle src/models/embed_matrices.pickle
+$(EMBED_PICKLES) : $(EMBEDDINGS) data/interim/train_2018-qualitative-data.csv 
+		@echo src/features/keras_embeddings.py
+		python src/features/keras_embeddings.py -i data/interim/train_2018-qualitative-data.csv
+		@echo $(EMBEDDINGS) data/interim/train_2018-qualitative-data.csv
+		@echo $(EMBED_PICKLES)
 
 
 #####################################
