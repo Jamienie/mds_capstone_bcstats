@@ -69,7 +69,7 @@ if __name__ == "__main__":
     comments = df.iloc[:, 1]
 
     # Load Tokenizers
-    with open('./models/embed_tokenizers.pickle', 'rb') as handle:
+    with open('src/models/embed_tokenizers.pickle', 'rb') as handle:
         embed_tokenizers = pickle.load(handle)
 
     # Encode Comments and save processed data for model training

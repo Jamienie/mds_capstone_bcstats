@@ -24,7 +24,7 @@ import scipy.sparse
 X_text_bow = scipy.sparse.load_npz('./data/processed/X_test_bow.npz')
 
 # Load Linear SVC Model
-with open('./models/linearsvc_model.pickle', 'rb') as handle:
+with open('src/models/linearsvc_model.pickle', 'rb') as handle:
     linearsvc_model = pickle.load(handle)
 
 # Predict themes
@@ -38,9 +38,9 @@ with open('./data/processed/X_test_encoded.pickle', 'rb') as handle:
     X_test_encoded = pickle.load(handle)
 
 # Load Neural Net Classification Models
-with open('./models/conv1d_models.pickle', 'rb') as handle:
+with open('src/models/conv1d_models.pickle', 'rb') as handle:
     conv1d_models = pickle.load(handle)
-with open('./models/biGRU_models.pickle', 'rb') as handle:
+with open('src/models/biGRU_models.pickle', 'rb') as handle:
     biGRU_models = pickle.load(handle)
 
 # Predict on each embedding
