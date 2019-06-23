@@ -79,7 +79,9 @@ if __name__ == "__main__":
     args = get_arguments()
 
     # Default file paths for pre trained embeddings
-    path = './references/pretrained_embeddings.nosync/'
+    # NOTE: for MAC: path = "'./references/pretrained_embeddings.nosync/'
+    #       for Windows: path = "'./references/pretrained_embeddings/'
+    path = './references/pretrained_embeddings/'
     embedding_fnames = {
         'glove_crawl': path + 'glove/glove.840B.300d.w2v.txt',
         'glove_twitter': path + 'glove/glove.twitter.27B.200d.w2v.txt',
@@ -101,7 +103,7 @@ if __name__ == "__main__":
     for embed in embed_names:
         embed_tokenizers[embed] = get_embed_tokenizer(comments, embed)
 
-    with open('./models/embed_tokenizers.pickle', 'wb') as handle:
+    with open('src/models/embed_tokenizers.pickle', 'wb') as handle:
         pickle.dump(embed_tokenizers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Load pretrained embeddings
@@ -129,5 +131,5 @@ if __name__ == "__main__":
                                                  embed_tokenizers[embed],
                                                  embed_size)
 
-    with open('./models/embed_matrices.pickle', 'wb') as handle:
+    with open('src/models/embed_matrices.pickle', 'wb') as handle:
         pickle.dump(embed_matrices, handle, protocol=pickle.HIGHEST_PROTOCOL)
