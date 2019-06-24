@@ -13,4 +13,4 @@ data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
 data/raw/WES2015_Final_Qual_Results.xlsx
 data/processed
 data/interim
-models/
+./models/

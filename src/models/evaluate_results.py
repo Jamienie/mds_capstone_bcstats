@@ -284,7 +284,7 @@ def plot_theme_ROC(Y_true, Y_pred, title='Multi-class ROC', save_fpath=None):
     plt.title(title)
     plt.legend(loc="lower right")
     if save_fpath is not None:
-        plt.savefig(save_fpath)
+        plt.savefig(save_fpath, dpi=900)
     plt.show()
 
     return None
@@ -317,7 +317,7 @@ def plot_average_ROC_by_embed(Y_true, Y_pred, title='Average ROC',
     plt.title('Average ROC')
     plt.legend(loc="lower right")
     if save_fpath is not None:
-        plt.savefig(save_fpath)
+        plt.savefig(save_fpath, dpi=900)
     plt.show()
 
     return None
