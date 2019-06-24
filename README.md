@@ -99,17 +99,12 @@ python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glov
 
 ## Usage <a name="usage"></a>
 
-There are two makefiles to reproduce the separate parts of the analysis. To rerun the linking qualitative to quantitative analysis run from the project at the command line:
+This project separate makefiles for the two objectives. The text classification can be found in the `MakefileModel` and the linking qualitative to quantitative is in the `MakefileLinking`. To reproduce the project run each makefile from the project root at the command line.
 
+**Text Classification**
+To rerun the analysis in full and reproduce the models for prediction:
 ```
-make all -f MakefileLinking
-```
-
-
-To rerun the analysis in full and reproduce the models for prediction run the makefile at the command line
-
-```
-makefile
+make all -f MakefileModel
 ```
 
 With the models trained you can quickly make text classifications by running the script at the command line:
@@ -121,14 +116,31 @@ python src/models/run_classifier.py \
 
 Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 
+To remove all associated files:
+```
+make clean -f MakefileModel
+```
+
+**Linking Qualitative to Quantitative**
+To rerun the analysis in full and reproduce the results:
+```
+make all -f MakefileLinking
+```
+
+To remove all associated files:
+```
+make clean -f MakefileLinking
+```
+
+
 ## Navigating the Repository <a name="repo"></a>
-The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone this repository and then create the *local folders*.
+The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone the repository and then manually create the missing folders to be able to reproduce the analysis.
 
 ```
 .
 ├── data
-│   ├── *interim*
-│   ├── *processed*
+│   ├── interim
+│   ├── processed
 │   ├── raw
 ├── notebooks
 ├── predict
@@ -138,10 +150,10 @@ The correct folder structure is detailed below with all the directories for this
 |   ├── BC-stats_survey_documents
 │   ├── data-dictionaries
 │   ├── meeting_minutes
-│   └── *pretrained_embeddings.nosync*
-│       ├── *fasttext*
-│       ├── *glove*
-│       └── *w2v*
+│   └── pretrained_embeddings.nosync
+│       ├── fasttext
+│       ├── glove
+│       └── w2v
 ├── reports
 │   ├── figures
 └── src
