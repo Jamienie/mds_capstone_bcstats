@@ -15,6 +15,7 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Usage](#usage)
+- [Dependencies](#dependencies)
 - [Navigating the Repository](#repo)
 - [Results](#results)
 - [Authors](#authors)
@@ -22,7 +23,7 @@
 - [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
-The BCStats ministry conducts a [Work Environment Survey](https://www2.gov.bc.ca/gov/content/data/statistics/government/employee-research/wes) gathering information from government employees across the province. The goal of this survey is to identify areas for improvement and to understand employee engagement. Currently the survey contains ~80 multiple choice questions and one open ended written response. The written response asks the employees "What one thing would you like your organization to focus on to improve your work environment?". The responses are manually classified into 12 broad themes and 68 sub-themes and the aggregated results are reported.
+The BC Stats organization conducts a [Work Environment Survey](https://www2.gov.bc.ca/gov/content/data/statistics/government/employee-research/wes) gathering information from government employees across the BC Public Service. The goal of this survey is to identify areas for improvement and to understand employee engagement. Currently the survey contains ~80 multiple choice questions and one open ended written response. The written response asks the employees "What one thing would you like your organization to focus on to improve your work environment?". The responses are manually classified into 12 broad themes and 68 sub-themes and the aggregated results are reported.
 
 
  The focus of this project can be split into two components.
@@ -40,16 +41,26 @@ The first step to reproduce this analysis or use the text classification model i
 python
 - sklearn
 - numpy
+- pandas
 - keras
 - matplotlib
+- random
+- spacy
+- re
+- nltk
+- argparse
+- gensim
+- networkx
+- wordcloud
 
 R
 - tidyverse
 - foreign
+- testthat
 ```
 
 #### Data  
-To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require approval. Please reach out to one of the authors of this repository for more information.
+To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require authorization from BC Stats. Please reach out to one of the authors of this repository for more information.
 ```
 - data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
 - data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
@@ -88,24 +99,46 @@ python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glov
 ```
 
 ## Usage <a name="usage"></a>
+This project contains two separate makefiles, one to reproduce the text classification named `MakefileModel` and another for linking qualitative to quantitative called `MakefileLinking`. The makefiles are designed to be run from the project root through the command line.
 
-To Rerun the analysis in full and reproduce the models for prediction run the makefile at the command line
-
+**Text Classification**   
+To rerun the analysis in full and reproduce the models for prediction:
 ```
-makefile
+make all -f MakefileModel
 ```
 
-With the models trained you can quickly make text classifications by running the script at the command line:
+With the models trained you can quickly make text classifications by running the run_classifier script. Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 ```
 python src/models/run_classifier.py \
 --input_csv FILEPATH_IN
 --output_csv FILEPATH_OUT
 ```
 
-Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
+To remove all files associated with this section:
+```
+make clean -f MakefileModel
+```
+
+**Linking Qualitative to Quantitative**  
+To rerun the analysis in full and reproduce the results:
+```
+make all -f MakefileLinking
+```
+
+To remove all files associated with this section:
+```
+make clean -f MakefileLinking
+```
+
+## Dependencies <a name="dependencies"></a>
+**Text Classification**    
+![Text Classification](reports/figures/flow-chart_full.png)
+
+**Linking Qualitative to Quantitative**   
+
 
 ## Navigating the Repository <a name="repo"></a>
-The correct folder structure is detailed below with all the directories. In the first directory level there is individual Readme files with additional information about the contents in each main folder.
+The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone the repository and then manually create the missing folders to be able to reproduce the analysis.
 
 ```
 .
@@ -113,8 +146,10 @@ The correct folder structure is detailed below with all the directories. In the 
 │   ├── interim
 │   ├── processed
 │   ├── raw
-├── models
 ├── notebooks
+├── predict
+|   ├── predict_input
+|   └── predict_output
 ├── references
 |   ├── BC-stats_survey_documents
 │   ├── data-dictionaries
@@ -126,17 +161,18 @@ The correct folder structure is detailed below with all the directories. In the 
 ├── reports
 │   ├── figures
 └── src
+    ├── analysis
     ├── data
     ├── features  
     ├── models
-    ├── analysis
     └── visualization
 ```
 
+The folder structure and project organization has been adapted from [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/)
 
 ## Results <a name="results"></a>
 
->A brief summary of the results
+**create hyperlink to the final report once it is done**
 
 
 ## Authors <a name = "authors"></a>
