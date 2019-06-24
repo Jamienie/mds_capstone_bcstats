@@ -15,6 +15,7 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Usage](#usage)
+- [Dependencies](#dependencies)
 - [Navigating the Repository](#repo)
 - [Results](#results)
 - [Authors](#authors)
@@ -59,7 +60,7 @@ R
 ```
 
 #### Data  
-To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require authorization from BC Stats to access. Please reach out to one of the authors of this repository for more information.
+To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require authorization from BC Stats. Please reach out to one of the authors of this repository for more information.
 ```
 - data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
 - data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
@@ -98,39 +99,42 @@ python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glov
 ```
 
 ## Usage <a name="usage"></a>
+This project contains two separate makefiles, one to reproduce the text classification named `MakefileModel` and another for linking qualitative to quantitative called `MakefileLinking`. The makefiles are designed to be run from the project root through the command line.
 
-This project separate makefiles for the two objectives. The text classification can be found in the `MakefileModel` and the linking qualitative to quantitative is in the `MakefileLinking`. To reproduce the project run each makefile from the project root at the command line.
-
-**Text Classification**
+**Text Classification**   
 To rerun the analysis in full and reproduce the models for prediction:
 ```
 make all -f MakefileModel
 ```
 
-With the models trained you can quickly make text classifications by running the script at the command line:
+With the models trained you can quickly make text classifications by running the run_classifier script. Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 ```
 python src/models/run_classifier.py \
 --input_csv FILEPATH_IN
 --output_csv FILEPATH_OUT
 ```
 
-Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
-
-To remove all associated files:
+To remove all files associated with this section:
 ```
 make clean -f MakefileModel
 ```
 
-**Linking Qualitative to Quantitative**
+**Linking Qualitative to Quantitative**  
 To rerun the analysis in full and reproduce the results:
 ```
 make all -f MakefileLinking
 ```
 
-To remove all associated files:
+To remove all files associated with this section:
 ```
 make clean -f MakefileLinking
 ```
+
+## Dependencies <a name="dependencies"></a>
+**Text Classification**    
+![Text Classification](reports/figures/flow-chart_full.png)
+
+**Linking Qualitative to Quantitative**   
 
 
 ## Navigating the Repository <a name="repo"></a>
@@ -164,10 +168,11 @@ The correct folder structure is detailed below with all the directories for this
     └── visualization
 ```
 
+The folder structure and project organization has been adapted from [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/)
 
 ## Results <a name="results"></a>
 
->A brief summary of the results
+**create hyperlink to the final report once it is done**
 
 
 ## Authors <a name = "authors"></a>
