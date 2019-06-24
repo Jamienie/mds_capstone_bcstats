@@ -6,13 +6,14 @@
 # Purpose: This script takes in the cleaned qualitative data and 
 #           cleaned quantitative data and joins them and outputs
 #           the joined data and then takes in the desensitized comments
-#           and adds the comments back to the data
+#           and adds the comments, theme and subtheme names to the data
 #
 # Inputs: 
-#   This script takes 3 arguments
+#   This script takes 4 arguments
 #     - cleaned qualitative data
 #     - cleaned quantitative data
 #     - desensitized qualitative data
+#     - theme sub-theme names
 #
 # Outputs:
 #   This script has 1 output
@@ -25,7 +26,7 @@
 # Rscript src/analysis/linking_join_qual_to_quant.R input_qual input_quant output_joined
 #
 # Real example:
-# Rscript src/analysis/linking_join_qual_to_quant.R "./data/interim/linking_cleaned_qual.csv" "./data/interim/linking_cleaned_quant.csv" "./data/interim/desensitized_qualitative-data2018.csv" "./data/interim/linking_joined_qual_quant.csv"
+# Rscript src/analysis/linking_join_qual_to_quant.R "./data/interim/linking_cleaned_qual.csv" "./data/interim/linking_cleaned_quant.csv" "./data/interim/desensitized_qualitative-data2018.csv" "./references/data-dictionaries/theme_subtheme_names.csv" "./data/interim/linking_joined_qual_quant.csv"
 #
 
 
@@ -38,7 +39,8 @@ args <- commandArgs(trailingOnly = TRUE)
 input_qual <- args[1]
 input_quant <- args[2]
 input_comments <- args[3]
-output_file <- args[4]
+input_legend <- args[4]
+output_file <- args[5]
 
 
 # define main function
@@ -53,37 +55,23 @@ main <- function(){
     drop_na(quan_value) %>% 
     mutate(diff = quan_value - qual_value)
   
-  
+  # load theme and subtheme names
+  legend <- read_csv(input_legend)
   
   # load comments to add to joined data
   input_comments <- "./data/interim/desensitized_qualitative-data2018.csv"
   comments <- read_csv(input_comments) %>% 
     select(USERID = `_telkey`, `2018 Comment`)
-  
-  
-  # create matching between theme number and name
-  theme_qual <- tribble(
-    ~num, ~theme,                     ~short_name,
-    1, "Career & Personal Development", "CPD",
-    2, "Compensation & Benefits",       "CB",
-    3, "Engagement & Workplace Culture","EWC",
-    4, "Executives",                   "Exec",           
-    5, "Flexible Work Environment",    "FWE",
-    6, "Staffing Practices",           "SP",
-    7, "Recognition & Empowerment",    "RE",
-    8, "Supervisors",                  "Sup",
-    9, "Stress & Workload",            "SW",
-    10,"Tools, Equipment & Physical Environment", "TEPE",
-    11, "Vision, Mission & Goals",     "VMG",
-    12, "Other",                        "OTH"
-  )
-  
+
   # add theme names and comments to joined data
   joined_data <- joined_data %>% 
     mutate(main_theme = str_sub(`code`, start = 1, end = str_length(`code`)-1),
-           Theme = theme_qual$theme[match(`main_theme`, theme_qual$num)]) %>% 
-    select(USERID, code, qual_value, quan_value, question, diff, Theme) %>% 
-    left_join(comments, by="USERID")
+           theme = legend$theme[match(`main_theme`, legend$theme_num)],
+           subtheme_description = legend$subtheme_description[match(`code`, legend$code)]
+           ) %>% 
+    left_join(comments, by="USERID") %>% 
+    select(USERID, code, qual_value, quan_value, question,
+           diff, text=`2018 Comment`, theme, subtheme_description)
   
   # Unit Test to confirm filtering is working correctly
   person1 = "172541-914038"  # code 92 = 1
