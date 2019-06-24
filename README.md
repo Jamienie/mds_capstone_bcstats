@@ -22,7 +22,7 @@
 - [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
-The BCStats ministry conducts a [Work Environment Survey](https://www2.gov.bc.ca/gov/content/data/statistics/government/employee-research/wes) gathering information from government employees across the province. The goal of this survey is to identify areas for improvement and to understand employee engagement. Currently the survey contains ~80 multiple choice questions and one open ended written response. The written response asks the employees "What one thing would you like your organization to focus on to improve your work environment?". The responses are manually classified into 12 broad themes and 68 sub-themes and the aggregated results are reported.
+The BC Stats organization conducts a [Work Environment Survey](https://www2.gov.bc.ca/gov/content/data/statistics/government/employee-research/wes) gathering information from government employees across the BC Public Service. The goal of this survey is to identify areas for improvement and to understand employee engagement. Currently the survey contains ~80 multiple choice questions and one open ended written response. The written response asks the employees "What one thing would you like your organization to focus on to improve your work environment?". The responses are manually classified into 12 broad themes and 68 sub-themes and the aggregated results are reported.
 
 
  The focus of this project can be split into two components.
@@ -40,16 +40,26 @@ The first step to reproduce this analysis or use the text classification model i
 python
 - sklearn
 - numpy
+- pandas
 - keras
 - matplotlib
+- random
+- spacy
+- re
+- nltk
+- argparse
+- gensim
+- networkx
+- wordcloud
 
 R
 - tidyverse
 - foreign
+- testthat
 ```
 
 #### Data  
-To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require approval. Please reach out to one of the authors of this repository for more information.
+To fully reproduce the analysis you need the following data files stored on your local computer. These contain sensitive information and require authorization from BC Stats to access. Please reach out to one of the authors of this repository for more information.
 ```
 - data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
 - data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
@@ -89,7 +99,14 @@ python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glov
 
 ## Usage <a name="usage"></a>
 
-To Rerun the analysis in full and reproduce the models for prediction run the makefile at the command line
+There are two makefiles to reproduce the separate parts of the analysis. To rerun the linking qualitative to quantitative analysis run from the project at the command line:
+
+```
+make all -f MakefileLinking
+```
+
+
+To rerun the analysis in full and reproduce the models for prediction run the makefile at the command line
 
 ```
 makefile
@@ -105,31 +122,33 @@ python src/models/run_classifier.py \
 Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
 
 ## Navigating the Repository <a name="repo"></a>
-The correct folder structure is detailed below with all the directories. In the first directory level there is individual Readme files with additional information about the contents in each main folder.
+The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone this repository and then create the *local folders*.
 
 ```
 .
 ├── data
-│   ├── interim
-│   ├── processed
+│   ├── *interim*
+│   ├── *processed*
 │   ├── raw
-├── models
 ├── notebooks
+├── predict
+|   ├── predict_input
+|   └── predict_output
 ├── references
 |   ├── BC-stats_survey_documents
 │   ├── data-dictionaries
 │   ├── meeting_minutes
-│   └── pretrained_embeddings.nosync
-│       ├── fasttext
-│       ├── glove
-│       └── w2v
+│   └── *pretrained_embeddings.nosync*
+│       ├── *fasttext*
+│       ├── *glove*
+│       └── *w2v*
 ├── reports
 │   ├── figures
 └── src
+    ├── analysis
     ├── data
     ├── features  
     ├── models
-    ├── analysis
     └── visualization
 ```
 
