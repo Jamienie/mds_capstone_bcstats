@@ -1,0 +1,77 @@
+# Driver Script
+# Aaron Quinton, Ayla Pearson and Fan Nie
+# June 2019
+
+# This driver script opens ...
+#
+
+# to make multiple targets just list them with a space after
+
+# run all analysis
+all: reports/linking.md data/processed/linking_inter_rater_agreement.csv data/processed/linking_agreement_subtheme.csv data/processed/linking_agreement_theme.csv
+
+
+# step 1: calculate inter-rater reliability
+data/processed/linking_inter_rater_agreement.csv : references/data-dictionaries/survey_mc_legend_inter-rater.csv src/analysis/linking_inter_rater_agreement.R
+	Rscript src/analysis/linking_inter_rater_agreement.R  references/data-dictionaries/survey_mc_legend_inter-rater.csv data/processed/linking_inter_rater_agreement.csv
+
+step 2: create figure showing sub-theme multiple-choice matching
+reports/figures/linking_subtheme_mc.png : references/data-dictionaries/survey_mc_legend.csv data/interim/desensitized_qualitative-data2018.csv src/visualization/linking_subtheme_mc_matching.R
+	Rscript src/visualization/linking_subtheme_mc_matching.R data/interim/desensitized_qualitative-data2018.csv references/data-dictionaries/survey_mc_legend.csv reports/figures/linking_subtheme_mc.png
+
+# step  3: clean data
+data/interim/linking_cleaned_qual.csv : data/interim/desensitized_qualitative-data2018.csv src/data/linking_clean_qual.R
+	Rscript src/data/linking_clean_qual.R data/interim/desensitized_qualitative-data2018.csv data/interim/linking_cleaned_qual.csv
+
+data/interim/linking_cleaned_quant.csv : data/processed/tidy_quant_questions.csv references/data-dictionaries/survey_mc_legend.csv src/data/linking_clean_quant.R
+	Rscript src/data/linking_clean_quant.R data/processed/tidy_quant_questions.csv references/data-dictionaries/survey_mc_legend.csv data/interim/linking_cleaned_quant.csv
+
+# step 4: join datasets
+data/interim/linking_joined_qual_qaunt.csv : data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv src/analysis/linking_join_qual_to_quant.R
+	Rscript src/analysis/linking_join_qual_to_quant.R data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/linking_joined_qual_qaunt.csv
+
+# step 5: generate results
+reports/figures/linking_agreement_subtheme.png : data/interim/linking_joined_qual_qaunt.csv src/visualization/linking_agreement_figure_subtheme.R
+	Rscript src/visualization/linking_agreement_figure_subtheme.R data/interim/linking_joined_qual_qaunt.csv reports/figures/linking_agreement_subtheme.png
+
+reports/figures/linking_agreement_theme.png : data/interim/linking_joined_qual_qaunt.csv src/visualization/linking_agreement_figure_theme.R
+	Rscript src/visualization/linking_agreement_figure_theme.R data/interim/linking_joined_qual_qaunt.csv reports/figures/linking_agreement_theme.png
+
+data/processed/linking_agreement_subtheme.csv : data/interim/linking_joined_qual_qaunt.csv src/analysis/linking_agreement_results_subtheme.R
+	Rscript src/analysis/linking_agreement_results_subtheme.R data/interim/linking_joined_qual_qaunt.csv data/processed/linking_agreement_subtheme.csv
+
+data/processed/linking_agreement_theme.csv : data/interim/linking_joined_qual_qaunt.csv src/analysis/linking_agreement_results_theme.R
+	Rscript src/analysis/linking_agreement_results_theme.R data/interim/linking_joined_qual_qaunt.csv data/processed/linking_agreement_theme.csv
+
+# step 6: create document to house files
+reports/linking.md : reports/figures/linking_agreement_theme.png reports/figures/linking_agreement_subtheme.png reports/figures/linking_subtheme_mc.png
+	Rscript -e ".libPaths(); rmarkdown::render('reports/linking.Rmd')"
+
+
+
+# Delete all files outputted from running the analysis
+clean :
+	rm -f data/interim/linking_cleaned_qual.csv
+	rm -f data/interim/linking_cleaned_quant.csv
+	rm -f data/interim/linking_joined_qual_qaunt.csv
+	rm -f data/processed/linking_inter_rater_agreement.csv
+	rm -f data/processed/linking_agreement_subtheme.csv
+	rm -f data/processed/linking_agreement_theme.csv
+	rm -f reports/figures/linking_agreement_subtheme.png
+	rm -f reports/figures/linking_agreement_theme.png
+	rm -f reports/figures/linking_subtheme_mc.png
+	rm -f reports/linking.md
+	rm -f reports/linking.html
+
+
+# Delete all figures
+clean_figures :
+	rm -f reports/figures/linking_agreement_subtheme.png
+	rm -f reports/figures/linking_agreement_theme.png
+	rm -f reports/figures/linking_subtheme_mc.png
+
+
+# Delete clean data:
+clean_cleandata:
+	rm -f data/interim/linking_cleaned_qual.csv
+	rm -f data/interim/linking_cleaned_quant.csv
