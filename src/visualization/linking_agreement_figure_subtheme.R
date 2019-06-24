@@ -96,7 +96,6 @@ main <- function(){
     geom_col(aes(x=factor(diff), y=n, fill=Theme)) +
     facet_wrap(~code) +
     labs(x="", y="count", fill="") +
-    ggtitle("Distribution of Agreement per Subtheme") +
     theme_bw()+
     scale_fill_brewer(type="qual", palette = "Paired") +
     theme(legend.position="bottom",

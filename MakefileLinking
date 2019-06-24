@@ -2,14 +2,17 @@
 # Aaron Quinton, Ayla Pearson and Fan Nie
 # June 2019
 
-# This driver script opens ...
+# Purpose: This driver script opens runs the linking qualitative to quantitative analysis
 #
+# Usage: Navigate to project root and run from bash:
+#						To run the entire analysis     `make all -f MakefileLinking`
+#						To clean all items             `make clean -f MakefileLinking`
+#						To clean only the figures      `make clean_figures -f MakefileLinking`
+#						To clean only the interim data `make clean_cleandata -f MakefileLinking`
 
-# to make multiple targets just list them with a space after
 
-# run all analysis
-all: reports/linking.md data/processed/linking_inter_rater_agreement.csv data/processed/linking_agreement_subtheme.csv data/processed/linking_agreement_theme.csv
-
+# run entire analysis
+all: reports/linking_methodology.html
 
 # step 1: calculate inter-rater reliability
 data/processed/linking_inter_rater_agreement.csv : references/data-dictionaries/survey_mc_legend_inter-rater.csv src/analysis/linking_inter_rater_agreement.R
@@ -27,8 +30,8 @@ data/interim/linking_cleaned_quant.csv : data/processed/tidy_quant_questions.csv
 	Rscript src/data/linking_clean_quant.R data/processed/tidy_quant_questions.csv references/data-dictionaries/survey_mc_legend.csv data/interim/linking_cleaned_quant.csv
 
 # step 4: join datasets
-data/interim/linking_joined_qual_qaunt.csv : data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv src/analysis/linking_join_qual_to_quant.R
-	Rscript src/analysis/linking_join_qual_to_quant.R data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/linking_joined_qual_qaunt.csv
+data/interim/linking_joined_qual_qaunt.csv : data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv src/analysis/linking_join_qual_to_quant.R
+	Rscript src/analysis/linking_join_qual_to_quant.R data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv data/interim/linking_joined_qual_qaunt.csv
 
 # step 5: generate results
 reports/figures/linking_agreement_subtheme.png : data/interim/linking_joined_qual_qaunt.csv src/visualization/linking_agreement_figure_subtheme.R
@@ -44,9 +47,8 @@ data/processed/linking_agreement_theme.csv : data/interim/linking_joined_qual_qa
 	Rscript src/analysis/linking_agreement_results_theme.R data/interim/linking_joined_qual_qaunt.csv data/processed/linking_agreement_theme.csv
 
 # step 6: create document to house files
-reports/linking.md : reports/figures/linking_agreement_theme.png reports/figures/linking_agreement_subtheme.png reports/figures/linking_subtheme_mc.png
-	Rscript -e ".libPaths(); rmarkdown::render('reports/linking.Rmd')"
-
+reports/linking_methodology.html : reports/figures/linking_agreement_theme.png reports/figures/linking_agreement_subtheme.png reports/figures/linking_subtheme_mc.png data/processed/linking_inter_rater_agreement.csv data/processed/linking_agreement_subtheme.csv data/processed/linking_agreement_theme.csv
+	Rscript -e ".libPaths(); rmarkdown::render('reports/linking_methodology.Rmd')"
 
 
 # Delete all files outputted from running the analysis
@@ -60,8 +62,8 @@ clean :
 	rm -f reports/figures/linking_agreement_subtheme.png
 	rm -f reports/figures/linking_agreement_theme.png
 	rm -f reports/figures/linking_subtheme_mc.png
-	rm -f reports/linking.md
-	rm -f reports/linking.html
+	rm -f reports/linking_methodology.md
+	rm -f reports/linking_methodology.html
 
 
 # Delete all figures
