@@ -21,7 +21,7 @@
 # Rscript src/analysis/linking_agreement_results_subtheme.R input_file output_file
 #
 # Real example:
-# Rscript src/analysis/linking_agreement_results_subtheme.R "./data/interim/linking_joined_qual_qaunt.csv" "./data/processed/linking_agreement_subtheme.csv" 
+# Rscript src/analysis/linking_agreement_results_subtheme.R "./data/interim/linking_joined_qual_quant.csv" "./data/processed/linking_agreement_subtheme.csv" 
 
 
 # load packages 
@@ -42,7 +42,7 @@ main <- function(){
   joined_data <- read_csv(input_file)
   
   # group data by subtheme 
-  # changed the "loss penality" it now takes the minimum value
+  # changed the "loss penalty" it now takes the minimum value
   grouped_data <- joined_data %>% 
     group_by(USERID, code) %>% 
     summarize(diff = min(diff)) %>% 

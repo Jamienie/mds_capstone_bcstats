@@ -56,7 +56,7 @@ main <- function(){
   qual <- gather(qual, key= "code_num", value="code", code1, code2, code3, code4, code5)
   
   # remove other theme and unrelated comments, create negative rating, and
-  # add main themes label from subtheme code
+  # add main themes label from sub-theme code
   qual_cleaned <- qual %>% 
     drop_na(code) %>% 
     filter(code != 99) %>% 

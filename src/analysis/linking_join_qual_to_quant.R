@@ -4,7 +4,7 @@
 # June 2019
 #
 # Purpose: This script takes in the cleaned qualitative data and 
-#           cleaned quantititaive data and joins them and outputs
+#           cleaned quantitative data and joins them and outputs
 #           the joined data and then takes in the desensitized comments
 #           and adds the comments back to the data
 #
@@ -16,7 +16,7 @@
 #
 # Outputs:
 #   This script has 1 output
-#     - csv of joined qualitative and quanitative data
+#     - csv of joined qualitative and quantitative data
 #
 # Usage: 
 # Run from the project root
@@ -25,7 +25,7 @@
 # Rscript src/analysis/linking_join_qual_to_quant.R input_qual input_quant output_joined
 #
 # Real example:
-# Rscript src/analysis/linking_join_qual_to_quant.R "./data/interim/linking_cleaned_qual.csv" "./data/interim/linking_cleaned_quant.csv" "./data/interim/desensitized_qualitative-data2018.csv" "./data/interim/linking_joined_qual_qaunt.csv"
+# Rscript src/analysis/linking_join_qual_to_quant.R "./data/interim/linking_cleaned_qual.csv" "./data/interim/linking_cleaned_quant.csv" "./data/interim/desensitized_qualitative-data2018.csv" "./data/interim/linking_joined_qual_quant.csv"
 #
 
 
@@ -48,7 +48,7 @@ main <- function(){
   qual <- read_csv(input_qual)
   quant <- read_csv(input_quant)
   
-  # combine qualitative and quanitative dfs
+  # combine qualitative and quantitative dfs
   joined_data <- left_join(qual, quant, by=c("USERID", "code"="theme")) %>% 
     drop_na(quan_value) %>% 
     mutate(diff = quan_value - qual_value)

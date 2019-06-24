@@ -21,7 +21,7 @@
 # Rscript src/visualization/linking_agreement_figure_theme.R input_file output_file
 #
 # Real example:
-# Rscript src/visualization/linking_agreement_figure_theme.R "./data/interim/linking_joined_qual_qaunt.csv" "reports/figures/linking_agreement_theme.png" 
+# Rscript src/visualization/linking_agreement_figure_theme.R "./data/interim/linking_joined_qual_quant.csv" "reports/figures/linking_agreement_theme.png" 
 
 
 # load packages 
@@ -39,19 +39,18 @@ main <- function(){
   
   options(readr.num_columns = 0)
   # loaded joined data
- # input_file <- "./data/interim/linking_joined_qual_qaunt.csv"
   joined_data <- read_csv(input_file)
   
 
   # group data for plotting and tables 
-  # changed the "loss penality" it now takes the minimum value
+  # changed the "loss penalty" it now takes the minimum value
   grouped_data <- joined_data %>% 
     group_by(USERID, code) %>% 
     summarize(diff = min(diff)) %>% 
     group_by(code, diff) %>% 
     summarize(n=n())
 
-  # dictonary for theme names
+  # dictionary for theme names
   theme_qual <- tribble(
     ~num, ~theme,                     ~short_name,
     1, "Career & Personal Development", "CPD",
@@ -78,7 +77,7 @@ main <- function(){
     summarize(counter = sum(n)) %>% 
     mutate(short_name = theme_qual$short_name[match(`Theme` , theme_qual$theme)])
   
-  # plot of proportions of agreeement by theme
+  # plot of proportions of agreement by theme
   theme <- ggplot(data=general_theme) +
     geom_bar(aes(x=factor(short_name, 
                           levels = c("CB", "SP", "Exec", "TEPE", "SW","CPD", "Sup", "RE",
@@ -116,7 +115,6 @@ main <- function(){
     expect_equal(sum(test1$n), 4)
   })
   # save figure if tests pass
- # output_file <- "reports/figures/test2.png" 
   ggsave(output_file, plot=theme, dpi=400, width=10, height=7)
   
 }
