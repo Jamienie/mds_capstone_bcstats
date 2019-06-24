@@ -11,6 +11,7 @@ nlp = spacy.load('en_core_web_sm')
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 import numpy as np
 import random
 
@@ -219,7 +220,8 @@ def filter_emotionless_comments(data):
     Dataframe where all the "emotionless" comments have been filtered out
 
     """
-
+    
+    data = data.copy()
     width = data.shape[1]
     # determine starting location of emotion scores
     count = 0
@@ -294,7 +296,7 @@ def create_bar_plot(agreement, data, title):
     Parameters
     ----------
     agreement: str or int
-        Either 0, 1, 2 or "all"
+        Either 0, 1, 2, "all" or None
     data: dataframe
         Counts are grouped by subtheme and agreement level for each emotion.
         Dataframe must be in long form where there is a column for each emotion.
@@ -310,7 +312,7 @@ def create_bar_plot(agreement, data, title):
     if isinstance(data, pd.DataFrame) == True:
         emotion_list = list_emotion_present_in_data(data)
         colours = get_plot_colours(emotion_list)
-
+        fig = plt.figure()
         ax = data.plot.bar(rot=0,
                      x='diff',
                      y=emotion_list,
@@ -319,29 +321,79 @@ def create_bar_plot(agreement, data, title):
     elif isinstance(data, pd.Series) == True:
         emotion_list = data.index.values.tolist()
         colours = get_plot_colours(emotion_list)
+        data = data.rename({"sad":"sadness"})
+        fig = plt.figure()
         ax = data.plot.bar(rot=0,
-                     color=colours)
-
+                          color=colours,
+                          xticks=["a","b", "c", "d"])
     plt.xlabel("")
     plt.title(title)
     if agreement == None:
-        plt.show();
+        return fig
 
     if agreement == "all":
         plt.legend(bbox_to_anchor=(1.24, 0.85), loc="upper right")
         ind = np.arange(data.shape[0])
         ax.set_xticks(ind)
-        ax.set_xticklabels(('Strong', 'Weak', 'None'));
+        ax.set_xticklabels(('Strong', 'Weak', 'None'))
+        return fig;
     if agreement == 0:
         plt.legend(bbox_to_anchor=(1.24, 0.85), loc="upper right")
-        ax.set_xticklabels(labels=["Strong"]);
+        ax.set_xticklabels(labels=["Strong"])
+        return fig;
     if agreement == 1:
         plt.legend(bbox_to_anchor=(1.24, 0.85), loc="upper right")
-        ax.set_xticklabels(labels=["Weak"]);
+        ax.set_xticklabels(labels=["Weak"])
+        return fig;
     if agreement == 2:
         plt.legend(bbox_to_anchor=(1.24, 0.85), loc="upper right")
-        ax.set_xticklabels(labels=["None"]);
+        ax.set_xticklabels(labels=["None"])
+        return fig;
+    
+    
+def create_bar_plot_percent(data ):
+    """
+    
+    
+    
+    Parameters
+    ----------
+    data: dataframe
+        Counts are grouped by subtheme and agreement level for each emotion.
+        Dataframe must be in long form where there is a column for each emotion.
+    """
+    data = data.copy()
+    
+    # total number of comments
+    full_data_size = data.shape[0]
+    # filter out emotionless comments
+    emotionless_removed_df = filter_emotionless_comments(data)
+    emotionless_removed_size = emotionless_removed_df.shape[0]
+    # obtain number of emotionless comments
+    
+    emotionless_size = full_data_size - emotionless_removed_size   
+    one_hot_df = one_hot_emotions(emotionless_removed_df, groupby=None, agreement=None)
+    
 
+    # add emotionless count to the emotion counts
+    emotionless = pd.Series([emotionless_size], index=["emotionless"])
+    one_hot_df = one_hot_df.append(emotionless)
+
+    # obtain proportion of each emotion
+    perc = one_hot_df/sum(one_hot_df)
+    
+    # plot proportion of each emotion
+    perc = perc.rename({"sad":"sadness"})
+    fig = plt.figure()
+    ax = perc.plot.bar(rot=0, color=["#12AAB5", "#7C2F5B", "#2F5B7C", "lightgrey"])
+    title = "Total Number of Comments " + str(full_data_size)
+    plt.title(title)
+    
+    return fig
+    
+    
+ #   one_hot_df.plot.bar(rot=0)
+    
 
 def get_plot_colours(emotions):
     """
@@ -429,8 +481,8 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
     if agreement == None:
         if depth == "code":
-            title = title_intro + ": " + data[data["code"] == name].iloc[0]['subtheme_description'] \
-            + "\n (code " +str(name) + ") - " +   data[data["code"] == name].iloc[0]['theme']
+            title = title_intro + ": " + str(data[data["code"] == name].iloc[0]['subtheme_description']) \
+            + "\n (code " +str(name) + ") - " +   str(data[data["code"] == name].iloc[0]['theme'])
         else:
             title = title_intro + str(name)
         agreement = False
@@ -446,8 +498,8 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
     elif agreement == "all":
         if depth == "code":
-            title = title_intro + ": " + data[data["code"] == name].iloc[0]['subtheme_description'] \
-            + "\n (code " +str(name) + ") - " +   data[data["code"] == name].iloc[0]['theme'] \
+            title = title_intro + ": " + str(data[data["code"] == name].iloc[0]['subtheme_description']) \
+            + "\n (code " +str(name) + ") - " +   str(data[data["code"] == name].iloc[0]['theme']) \
             + " - "+ agreement.capitalize() + " Agreement Levels"
         else:
             title = title_intro + str(name) + " - "+ agreement.capitalize() + " Agreement Levels"
@@ -457,8 +509,8 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
     elif agreement == "strong":
         if depth == "code":
-            title = title_intro + ": " + data[data["code"] == name].iloc[0]['subtheme_description'] \
-            + "\n (code " +str(name) + ") - " +   data[data["code"] == name].iloc[0]['theme'] \
+            title = title_intro + ": " + str(data[data["code"] == name].iloc[0]['subtheme_description']) \
+            + "\n (code " +str(name) + ") - " +   str(data[data["code"] == name].iloc[0]['theme']) \
             + " - "+ agreement.capitalize() + " Agreement"
         else:
             title = title_intro + str(name) + " - "+ agreement.capitalize() + " Agreement"
@@ -469,8 +521,8 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
     elif agreement == "weak":
         if depth == "code":
-            title = title_intro + ": " + data[data["code"] == name].iloc[0]['subtheme_description'] \
-            + "\n (code " +str(name) + ") - " +   data[data["code"] == name].iloc[0]['theme'] \
+            title = title_intro + ": " + str(data[data["code"] == name].iloc[0]['subtheme_description']) \
+            + "\n (code " +str(name) + ") - " +   str(data[data["code"] == name].iloc[0]['theme']) \
             + " - "+ agreement.capitalize() + " Agreement"
         else:
             title = title_intro + str(name) + " - "+ agreement.capitalize() + " Agreement"
@@ -481,8 +533,8 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
     elif agreement == "no":
         if depth == "code":
-            title = title_intro + ": " + data[data["code"] == name].iloc[0]['subtheme_description'] \
-            + "\n (code " +str(name) + ") - " +   data[data["code"] == name].iloc[0]['theme'] \
+            title = title_intro + ": " + str(data[data["code"] == name].iloc[0]['subtheme_description']) \
+            + "\n (code " +str(name) + ") - " +   str(data[data["code"] == name].iloc[0]['theme']) \
             + " - "+ "No Agreement"
         else:
             title = title_intro + str(name) + " - "+ "No Agreement"
@@ -527,6 +579,7 @@ def get_theme_labels(data, legend):
     return data
 
 
+
 def format_raw_comments(data):
     """
     Takes in the full comment data and gathers the codes into a single column
@@ -548,16 +601,19 @@ def format_raw_comments(data):
     data = data.copy()
 
     # replace all blank spaces with NaN values
-    columns = ["code2", "code3", "code4", "code5"]
+    columns = ["code1", "code2", "code3", "code4", "code5"]
     for i in columns:
-        condition = (data[i] != ' ')
-        data[i] = data[i].where(condition, np.nan)
+        if  is_numeric_dtype(data[i]) == False:
+            condition = (data[i] != ' ')
+            data[i] = data[i].where(condition, np.nan)
 
     # gather all subtheme codes to a single column
     data = pd.melt(data,
                     id_vars=["USERID", "text"],
                     value_vars=["code1", "code2", "code3", "code4", "code5"],
                     value_name="code").dropna()[['USERID', "code", "text"]]
+    data['code'] = data['code'].astype(int)
+   
     return data
 
 
@@ -742,10 +798,13 @@ def examine_emotion_scoring(data, emotion, lexicon, index=None, normalize=False)
         df1_display = pd.DataFrame(data = series.values.reshape(1,series.shape[0]),
                             columns = series.index)
         df1_display = df1_display.set_index(pd.Index([index]))
+        df1_display = df1_display.drop("text", axis=1)
         display(df1_display)
-
+        
     elif index == None:
-        display(df1.iloc[[row]])
+        df1_display = df1.drop("text", axis=1)
+        display(df1_display.iloc[[row]])
+        
     print("\n")
     print("Comment")
     print("-------")
