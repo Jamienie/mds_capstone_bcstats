@@ -30,21 +30,21 @@ data/interim/linking_cleaned_quant.csv : data/processed/tidy_quant_questions.csv
 	Rscript src/data/linking_clean_quant.R data/processed/tidy_quant_questions.csv references/data-dictionaries/survey_mc_legend.csv data/interim/linking_cleaned_quant.csv
 
 # step 4: join datasets
-data/interim/linking_joined_qual_qaunt.csv : data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv src/analysis/linking_join_qual_to_quant.R
-	Rscript src/analysis/linking_join_qual_to_quant.R data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv data/interim/linking_joined_qual_qaunt.csv
+data/interim/linking_joined_qual_quant.csv : data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv src/analysis/linking_join_qual_to_quant.R
+	Rscript src/analysis/linking_join_qual_to_quant.R data/interim/linking_cleaned_qual.csv data/interim/linking_cleaned_quant.csv data/interim/desensitized_qualitative-data2018.csv data/interim/linking_joined_qual_quant.csv
 
 # step 5: generate results
-reports/figures/linking_agreement_subtheme.png : data/interim/linking_joined_qual_qaunt.csv src/visualization/linking_agreement_figure_subtheme.R
-	Rscript src/visualization/linking_agreement_figure_subtheme.R data/interim/linking_joined_qual_qaunt.csv reports/figures/linking_agreement_subtheme.png
+reports/figures/linking_agreement_subtheme.png : data/interim/linking_joined_qual_quant.csv src/visualization/linking_agreement_figure_subtheme.R
+	Rscript src/visualization/linking_agreement_figure_subtheme.R data/interim/linking_joined_qual_quant.csv reports/figures/linking_agreement_subtheme.png
 
-reports/figures/linking_agreement_theme.png : data/interim/linking_joined_qual_qaunt.csv src/visualization/linking_agreement_figure_theme.R
-	Rscript src/visualization/linking_agreement_figure_theme.R data/interim/linking_joined_qual_qaunt.csv reports/figures/linking_agreement_theme.png
+reports/figures/linking_agreement_theme.png : data/interim/linking_joined_qual_quant.csv src/visualization/linking_agreement_figure_theme.R
+	Rscript src/visualization/linking_agreement_figure_theme.R data/interim/linking_joined_qual_quant.csv reports/figures/linking_agreement_theme.png
 
-data/processed/linking_agreement_subtheme.csv : data/interim/linking_joined_qual_qaunt.csv src/analysis/linking_agreement_results_subtheme.R
-	Rscript src/analysis/linking_agreement_results_subtheme.R data/interim/linking_joined_qual_qaunt.csv data/processed/linking_agreement_subtheme.csv
+data/processed/linking_agreement_subtheme.csv : data/interim/linking_joined_qual_quant.csv src/analysis/linking_agreement_results_subtheme.R
+	Rscript src/analysis/linking_agreement_results_subtheme.R data/interim/linking_joined_qual_quant.csv data/processed/linking_agreement_subtheme.csv
 
-data/processed/linking_agreement_theme.csv : data/interim/linking_joined_qual_qaunt.csv src/analysis/linking_agreement_results_theme.R
-	Rscript src/analysis/linking_agreement_results_theme.R data/interim/linking_joined_qual_qaunt.csv data/processed/linking_agreement_theme.csv
+data/processed/linking_agreement_theme.csv : data/interim/linking_joined_qual_quant.csv src/analysis/linking_agreement_results_theme.R
+	Rscript src/analysis/linking_agreement_results_theme.R data/interim/linking_joined_qual_quant.csv data/processed/linking_agreement_theme.csv
 
 # step 6: create document to house files
 reports/linking_methodology.html : reports/figures/linking_agreement_theme.png reports/figures/linking_agreement_subtheme.png reports/figures/linking_subtheme_mc.png data/processed/linking_inter_rater_agreement.csv data/processed/linking_agreement_subtheme.csv data/processed/linking_agreement_theme.csv
@@ -55,7 +55,7 @@ reports/linking_methodology.html : reports/figures/linking_agreement_theme.png r
 clean :
 	rm -f data/interim/linking_cleaned_qual.csv
 	rm -f data/interim/linking_cleaned_quant.csv
-	rm -f data/interim/linking_joined_qual_qaunt.csv
+	rm -f data/interim/linking_joined_qual_quant.csv
 	rm -f data/processed/linking_inter_rater_agreement.csv
 	rm -f data/processed/linking_agreement_subtheme.csv
 	rm -f data/processed/linking_agreement_theme.csv

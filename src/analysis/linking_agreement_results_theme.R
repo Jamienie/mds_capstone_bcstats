@@ -21,7 +21,7 @@
 # Rscript src/analysis/linking_agreement_results_theme.R input_file output_file
 #
 # Real example:
-# Rscript src/analysis/linking_agreement_results_theme.R "./data/interim/linking_joined_qual_qaunt.csv" "./data/processed/linking_agreement_theme.csv" 
+# Rscript src/analysis/linking_agreement_results_theme.R "./data/interim/linking_joined_qual_quant.csv" "./data/processed/linking_agreement_theme.csv" 
 
 
 # load packages 

@@ -3,7 +3,7 @@
 # Aaron Quinton, Ayla Pearson, Fan Nie
 # June 2019
 #
-# Purpose: This scrip creates a visulization showing the relationship
+# Purpose: This scrip creates a visualization showing the relationship
 #           between the subtheme labels and multiple-choice questions
 #
 # Inputs: 
@@ -90,13 +90,12 @@ main <- function(){
     left_join(labels, by=c("subtheme" = "theme")) %>% 
     mutate(question = if_else(is.na(question), "no", "at least one"))
   
-  # creat plot
+  # create plot
   mc_subtheme <- ggplot(data=total_subtheme) +
     geom_point(aes(x=x_pos, y=y_pos, size=total_comments, color=question)) +
     geom_text(aes(x=x_pos, y=y_pos, label=subtheme),hjust=0, vjust=1.6, size=4.0) +
     theme_bw() +
     labs(x="", y="") +
-    #  ggtitle("Does the subtheme match to a multiple choice question?") +
     theme(axis.text.x = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks = element_blank(), 
