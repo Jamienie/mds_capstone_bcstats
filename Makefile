@@ -13,82 +13,133 @@
 # Run all scripts at once
 ############################################################################
 
-all: reports/final_report.md
+all: test_predictions.pickle
 
 ###########################################################################
-# Run the three scripts step by step to prepare datasets for
-# (exploratory data) analysis 
+# Run the two scripts step by step to prepare datasets for modelling 
 ###########################################################################
 
-DESEN_FILES = data/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
-RAW = data/raw/WES2015_Final_Qual_Results.xlsx data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx
-QUAL_TEST = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv
-QUAL_TRAIN = data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
-QUAL = data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
-TIDY_FILES = data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA.sav references/data-dictionaries/survey_mc_legend.csv references/data-dictionaries/Current\ Position\ with\ BU\ and\ Org\ Hierarchy\ -\ WES\ 2018.csv
+DESEN_FILE = data/interim/desensitized_qualitative-data2018.csv
+RAW = data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx
+QUAL = data/interim/test_2018-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
+
 
 # 1. Desensitization text - identify sensitive text (people's names) and remove the comments entirely
-# usage: make data/interim/desensitized_qualitative-data2015.csv data/interim/desensitized_qualitative-data2018.csv
-$(DESEN_FILES) : src/data/sensitive_text.py
-		python src/data/remove_sensitive_data.py $(RAW) $(DESEN_FILES)
+# usage: make data/interim/desensitized_qualitative-data2018.csv
+$(DESEN_FILE) : $(RAW) references/data-dictionaries/NationalNames.csv src/data/sensitive_text.py
+		python src/data/sensitive_text.py -i data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx -o data/interim/desensitized_qualitative-data2018.csv -s 1 
+		@echo $(RAW) references/data-dictionaries/NationalNames.csv $(DESEN_FILE)
 
-# 2. Read in 2015 and 2018 desensitized qualitative data. Split for test/train
-# usage: make data/interim/test_2015-qualitative-data.csv data/interim/test_2018-qualitative-data.csv data/interim/train_2015-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
-$(QUAL) : $(DESEN_FILES) src/data/split_qual_data.py 
-		python src/data/split_qual_data.py $(DESEN_FILES) $(QUAL)
 
-# 3. combine 2015 and 2018 datasets into one csv file
-# usage: make data/interim/qual_combined_train.csv
-data/interim/qual_combined_train.csv : src/data/make_qual_dataset.py 
-		python src/data/make_qual_dataset.py $(QUAL_TRAIN) data/interim/qual_combined_train.csv
-        
+# 2. Read 2018 desensitized qualitative data. Split for test/train
+# usage: make data/interim/test_2018-qualitative-data.csv data/interim/train_2018-qualitative-data.csv
+$(QUAL) : $(DESEN_FILE) src/data/split_qual_data.py 
+		python src/data/split_qual_data.py $(DESEN_FILE) $(QUAL)
+
 ###########################################################################
 # Run the these scripts step by step to build baseline model 
 # for text classification -- Bag of Words with LinearSVC
 ###########################################################################
 
-SPLIT_FILES = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
-X_FIles = data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv
-BOW_FILES = data/interim/X_train_bow.npz data/interim/X_valid_bow.npz 
+# 1. Preprocess text and fit Bag of Words Vectorizer
+# usage: make src/models/bow_vectorizer.pickle
+bow_vectorizer.pickle : data/interim/train_2018-qualitative-data.csv src/features/bow_vectorizer.py 
+		python src/features/bow_vectorizer.py -i data/interim/train_2018-qualitative-data.csv
+		@echo data/interim/train_2018-qualitative-data.csv src/models/bow_vectorizer.pickle
 
-# 1. Preprocessing and Data Preperation 2018 comment data
-# usage: make data/interim/X_train_2018-qualitative-data.csv data/interim/X_valid_2018-qualitative-data.csv data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_valid_2018-qualitative-data.csv
-$(SPLIT_FILES) : data/interim/train_2018-qualitative-data.csv src/models/preprocessing_data_preperation.py 
-		python src/models/preprocessing_data_preperation.py data/interim/train_2018-qualitative-data.csv $(SPLIT_FILES)
+# 2. Transform comments to a matrix of token counts for training data
+# usage: make data/processed/X_train_bow.npz
+data/processed/X_train_bow.npz : data/interim/train_2018-qualitative-data.csv src/data/preprocessing_text.py src/features/vectorize_comments.py
+		python src/features/vectorize_comments.py -i data/interim/train_2018-qualitative-data.csv -o data/processed/X_train_bow.npz
+		@echo data/interim/train_2018-qualitative-data.csv data/processed/X_train_bow.npz        
 
-# 2. Build Bag of Words
-# usage: make data/interim/X_train_bow.npz data/interim/X_valid_bow.npz
-$(BOW_FILES) : $(X_FILES) src/data/preprocessing_text.py src/models/bow.py
-		python src/models/bow.py $(X_FILES) $(BOW_FILES)        
+# 3. Transform comments to a matrix of token counts for test data
+# usage: make data/processed/X_test_bow.npz
+data/processed/X_test_bow.npz : data/interim/test_2018-qualitative-data.csv src/data/preprocessing_text.py src/features/vectorize_comments.py
+		python src/features/vectorize_comments.py -i data/interim/test_2018-qualitative-data.csv -o data/processed/X_test_bow.npz
+		@echo data/interim/test_2018-qualitative-data.csv data/processed/X_test_bow.npz
 
-# 3. Build LinearSVC model
-# usage: make data/interim/Y_pred_bow.csv
-data/interim/Y_pred_bow.csv: $(BOW_FILES) data/interim/Y_train_2018-qualitative-data.csv src/models/linearsvc.py
-		python src/models/linearsvc.py $(BOW_FILES) data/interim/Y_train_2018-qualitative-data.csv data/interim/Y_pred_bow.csv
+# 4. Train Lienar Classifer
+# usage: make src/models/linearsvc_model.pickle
+
+INPUT_TRAIN_LINEAR = data/interim/train_2018-qualitative-data.csv data/processed/X_train_bow.npz
+
+src/models/linearsvc_model.pickle : $(INPUT_TRAIN_LINEAR) src/models/linearsvc.py 
+		python src/models/linearsvc.py $(INPUT_TRAIN_LINEAR) src/models/linearsvc_model.pickle 
 
 
 ###########################################################################
 # Run the these scripts step by step to build deep learning model with 
-# pre-trained embeddings for text classification -- Keras model
+# pre-trained embeddings for text classification -- ensamble method
 ###########################################################################
 
+EMBED_PICKLES = src/models/embed_tokenizers.pickle src/models/embed_matrices.pickle
 
+# 1. Preprocess text, fit tokenizers, and build embedding matrices
+# usage: make src/models/embed_tokenizers.pickle src/models/embed_matrices.pickle
+$(EMBED_PICKLES) : data/interim/train_2018-qualitative-data.csv src/features/keras_embeddings.py
+		python src/features/keras_embeddings.py -i data/interim/train_2018-qualitative-data.csv
+		@echo data/interim/train_2018-qualitative-data.csv
+		@echo $(EMBED_PICKLES)
 
+# 2. Transform comments into coded numbers for training data
+# usage: make data/processed/X_train_encoded.pickle 
+data/processed/X_train_encoded.pickle : data/interim/train_2018-qualitative-data.csv  src/features/encode_comments.py
+		python src/features/encode_comments.py -i data/interim/train_2018-qualitative-data.csv -o data/processed/X_train_encoded.pickle 
+		@echo data/interim/train_2018-qualitative-data.csv data/processed/X_train_encoded.pickle
 
-#####################################
-# Generate report
-#####################################
+# 3. Transform comments into coded numbers for test data
+# usage: make data/processed/X_test_encoded.pickle 
+data/processed/X_test_encoded.pickle : data/interim/test_2018-qualitative-data.csv  src/features/encode_comments.py
+		python src/features/encode_comments.py -i data/interim/test_2018-qualitative-data.csv -o data/processed/X_test_encoded.pickle 
+		@echo data/interim/test_2018-qualitative-data.csv data/processed/X_test_encoded.pickle
 
+# 4. Train Bidirectonal GRU
+# usage: make src/models/biGRU_models.pickle
+src/models/biGRU_models.pickle : data/interim/train_2018-qualitative-data.csv src/models/embed_matrices.pickle data/processed/X_train_encoded.pickle src/models/biGRU.py
+		python src/models/biGRU.py
+		@echo data/interim/train_2018-qualitative-data.csv src/models/embed_matrices.pickle data/processed/X_train_encoded.pickle
+		@echo src/models/biGRU_models.pickle
+        
+# 5. Train convulutional neural net
+# usage: make src/models/conv1d_models.pickle
+src/models/conv1d_models.pickle : data/interim/train_2018-qualitative-data.csv src/models/embed_matrices.pickle data/processed/X_train_encoded.pickle src/models/conv1d.py
+		python src/models/conv1d.py
+		@echo data/interim/train_2018-qualitative-data.csv src/models/embed_matrices.pickle data/processed/X_train_encoded.pickle
+		@echo src/models/conv1d_models.pickle
 
+###########################################################################
+# Generate themem predictions for test data
+###########################################################################
 
-#####################################
+# 1. Predict themems for test data
+# usage: make data/output/test_predictions.pickle
+data/output/test_predictions.pickle : data/interim/train_2018-qualitative-data.csv src/models/linearsvc_model.pickle data/processed/X_test_encoded.pickle src/models/conv1d_models.pickle src/models/biGRU_models.pickle src/models/theme_classification.py
+		python src/models/theme_classification.py
+		@echo data/interim/train_2018-qualitative-data.csv src/models/linearsvc_model.pickle data/processed/X_test_encoded.pickle src/models/conv1d_models.pickle
+		@echo data/output/test_predictions.pickle   
+        
+       
+        
+        
+
+###########################################################################
 # Remove all files
-#####################################
+###########################################################################
 
 clean:
-	rm -f data/interim/desensitized_qualitative-data2015.csv
 	rm -f data/interim/desensitized_qualitative-data2018.csv
-	rm -f data/interim/test_2015-qualitative-data.csv 
 	rm -f data/interim/test_2018-qualitative-data.csv
-	rm -f data/interim/train_2015-qualitative-data.csv
 	rm -f data/interim/train_2018-qualitative-data.csv
+	rm -f src/models/bow_vectorizer.pickle
+	rm -f data/processed/X_train_bow.npz
+	rm -f data/processed/X_test_bow.npz
+	rm -f src/models/linearsvc_model.pickle    
+	rm -f src/models/embed_tokenizers.pickle
+	rm -f src/models/embed_matrices.pickle
+	rm -f data/processed/X_train_encoded.pickle
+	rm -f data/processed/X_test_encoded.pickle 
+	rm -f src/models/biGRU_models.pickle
+	rm -f src/models/conv1d_models.pickle
+	rm -f data/output/test_predictions.pickle
+

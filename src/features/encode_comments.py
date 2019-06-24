@@ -14,7 +14,7 @@ python src/features/encode_comments.py
 '''
 python src/features/encode_comments.py \
 --input_csv data/interim/test_2018-qualitative-data.csv \
---output_pickle data/processed/X_test_encoded.pickle \
+--output_pickle data/processed/X_test_encoded.pickle
 '''
 
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     comments = df.iloc[:, 1]
 
     # Load Tokenizers
-    with open('./models/embed_tokenizers.pickle', 'rb') as handle:
+    with open('src/models/embed_tokenizers.pickle', 'rb') as handle:
         embed_tokenizers = pickle.load(handle)
 
     # Encode Comments and save processed data for model training

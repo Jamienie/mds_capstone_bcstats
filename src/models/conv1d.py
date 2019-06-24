@@ -73,7 +73,7 @@ if __name__ == "__main__":
     Y_train = np.array(df.loc[:, "CPD":"OTH"])
 
     # Load embedding matrices
-    with open('./models/embed_matrices.pickle', 'rb') as handle:
+    with open('src/models/embed_matrices.pickle', 'rb') as handle:
         embed_matrices = pickle.load(handle)
 
     # Load training data
@@ -92,5 +92,5 @@ if __name__ == "__main__":
                                                 Y_train, embed,
                                                 embed_matrices[embed])
 
-    with open('./models/conv1d_models.pickle', 'wb') as handle:
+    with open('src/models/conv1d_models.pickle', 'wb') as handle:
         pickle.dump(conv1d_models, handle, protocol=pickle.HIGHEST_PROTOCOL)
