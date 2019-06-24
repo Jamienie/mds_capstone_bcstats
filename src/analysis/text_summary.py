@@ -34,9 +34,6 @@ import argparse                   # Version 1.1
 
 from src.data.preprocessing_text import clean_text
 from src.data.preprocessing_text import replace_typical_misspell
-# this might be moved 
-from src.analysis.emotion_analysis import get_theme_labels
-
 
 from gensim.models import KeyedVectors                  # Version 3.7,1
 import networkx as nx                                   # Version 2.2
@@ -207,7 +204,7 @@ def preprocess_corpus(text, stop_words=""):
     """
     
     if stop_words == "":
-        stop_words = ["a", "to", "of", "and", "it"]
+        stop_words = ["a", "an", "to", "of", "and", "it"]
 
     preprocessed = []
     for sentence in text:
@@ -410,14 +407,12 @@ def generate_summary_gensim(text, size_summary=200):
         List with each item being a single sentence
     
     """
-    
     text = preprocess_corpus(text)
     text = ". ".join(text)
-    
     return gensim_summarize(text, word_count=size_summary, split=True)
 
 
-def generate_text_summary(input_file, legend_file, summary_size, depth, name, agreement, 
+def generate_text_summary(input_file, summary_size, depth, name, agreement, 
                   method, embedding_file=None, embedding=None, embedding_return=False,
                          output_file="./data/processed/"):
     """
@@ -442,8 +437,6 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
     ----------
     input_file: str
         Path to the input data
-    legend_file: str
-        Path to the legend containing the mapping between subtheme codes and themes
     summary_size:
         For pretrained embedding it is the number of sentences
         For summa and gensim it is the number of characters  
@@ -487,7 +480,6 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
     # load and save the pretrained embeddings
     # geneate summary with 5 sentences for subtheme 13 with weak agreement
     summary, loaded_embedding = generate_text_summary(".\data\interim\joined_qual_quant.csv",  
-                                        "./references/data-dictionaries/theme_subtheme_names.csv",
                                         5,
                                         "subtheme",
                                         13,
@@ -498,7 +490,6 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
     
     # now use the loaded embeddings to speed up the run time
     generate_text_summary(".\data\interim\joined_qual_quant.csv",  
-                                    "./references/data-dictionaries/theme_subtheme_names.csv",
                                     5,
                                     "subtheme",
                                     13,
@@ -506,10 +497,8 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
                                     "pagerank",
                                     embedding=loaded_embedding)
     
-    
     # to generate a summary with 200 characters for subtheme 13 with weak agreement
     generate_text_summary(".\data\interim\joined_qual_quant.csv",  
-                                        "./references/data-dictionaries/theme_subtheme_names.csv",
                                         200,
                                         "subtheme",
                                         13,
@@ -518,18 +507,15 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
                                         
     # generate a summary 100 characters long for theme Supervisors with strong agreement
     generate_text_summary(".\data\interim\joined_qual_quant.csv",  
-                                        "./references/data-dictionaries/theme_subtheme_names.csv",
                                         100,
                                         "theme",
                                         Supervisors,
                                         "strong",
                                         "textrank")
     
-    
     # generate a summary 100 characters long for theme Supervisors with strong agreement but choose 
     # to not have it write  a csv 
     generate_text_summary(".\data\interim\joined_qual_quant.csv",  
-                                        "./references/data-dictionaries/theme_subtheme_names.csv",
                                         100,
                                         "theme",
                                         Supervisors,
@@ -539,10 +525,7 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
         
     """
     # read in data and legend
-    data = pd.read_csv(input_file, usecols = [0, 1, 4, 5, 6])
-    legend = pd.read_csv(legend_file)
-    # add theme labels to dataset
-    data = get_theme_labels(data, legend)
+    data = pd.read_csv(input_file)
     # generate corpus
     corpus = generate_corpus_from_comments(data,
                                            depth=depth, 
@@ -564,7 +547,15 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
                                                          embedding_size=300, 
                                                          size_summary=summary_size)
     if method == "textrank":
-        summary = generate_summary_gensim(corpus, summary_size)
+        corpus_preprocess = preprocess_corpus(corpus)
+        summary_processed = generate_summary_gensim(corpus_preprocess, summary_size)
+        # match sentences to original corpus so summary is more readable (ie contains stopwords)
+        summary = []
+        for sentence in summary_processed:
+            processed = re.sub(r'\.', '', sentence)
+            index = corpus_preprocess.index(processed)
+            summary.append(corpus[index])
+        
     if depth == None:
         if agreement == None: 
             title = "Summary for 2018 WES"
@@ -574,10 +565,10 @@ def generate_text_summary(input_file, legend_file, summary_size, depth, name, ag
     if depth == "subtheme":
         if agreement == None:
             title = "Summary for " +\
-            str(legend[legend["code"] == name].iloc[0]["subtheme_description"]).title() 
+            str(data[data["code"] == name].iloc[0]["subtheme_description"]).title() 
         else:
             title = "Summary for " +\
-            str(legend[legend["code"] == name].iloc[0]["subtheme_description"]).title()  +\
+            str(data[data["code"] == name].iloc[0]["subtheme_description"]).title()  +\
             " - " + str(agreement).title() +" Agreement"
     if depth == "theme":
         if agreement == None:
@@ -608,7 +599,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file", type=str)
-    parser.add_argument("legend_file", type=str)
     parser.add_argument("summary_size", type=int)
     parser.add_argument("depth", type=str)
     parser.add_argument("name", type=str)
@@ -621,7 +611,6 @@ if __name__ == "__main__":
     args = parser.parse_args() 
 
     generate_text_summary(args.input_file, 
-                          args.legend_file, 
                           args.summary_size, 
                           args.depth, 
                           args.name, 
