@@ -135,7 +135,7 @@ make clean -f MakefileLinking
 ![Text Classification](reports/figures/flow-chart_full.png)
 
 **Linking Qualitative to Quantitative**   
-
+![Text Classification](reports/figures/flow-chart-linking.png)
 
 ## Navigating the Repository <a name="repo"></a>
 The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone the repository and then manually create the missing folders to be able to reproduce the analysis.
