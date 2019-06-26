@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun  6 11:24:21 2019
+text_summary.py
+Aaron Quinton, Ayla Pearson and Fan Nie
+June 2019
 
 This script preforms text summarization. The generate_text_summary combines 
 all the functions into a single step. The general workflow if you wanted to
