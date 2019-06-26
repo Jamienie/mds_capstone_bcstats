@@ -4,9 +4,9 @@
 #
 # Purpose: This script is use to automate our data analysis project pipline
 # Useage:
-# 		- make <specific file name> -f MakefileModel
-#		- make all -f MakefileModel
-#		- make clean -f MakefileModel
+# 		- To run individual script -- 'make <specific file name> -f MakefileModel'
+#		- To run the entire analysis -- 'make all -f MakefileModel'
+#		- To clean all items -- 'make clean -f MakefileModel'
 
 
 ############################################################################
