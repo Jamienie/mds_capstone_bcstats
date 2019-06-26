@@ -73,8 +73,8 @@ main <- function(){
   })
   
   # create grid for plot
-  x_axis <- rep(1:11, times=6)[1:62] 
-  y_axis <- rep(1:11, each=11)[1:62]
+  x_axis <- rep(1:16, times=6)[1:62] 
+  y_axis <- rep(1:16, each=16)[1:62]
   
   # create table with a grid for plotting
   total_subtheme <- data_qual %>% 
@@ -93,7 +93,7 @@ main <- function(){
   # create plot
   mc_subtheme <- ggplot(data=total_subtheme) +
     geom_point(aes(x=x_pos, y=y_pos, size=total_comments, color=question)) +
-    geom_text(aes(x=x_pos, y=y_pos, label=subtheme),hjust=0, vjust=1.6, size=4.0) +
+    geom_text(aes(x=x_pos, y=y_pos, label=subtheme),hjust=0, vjust=1.6, size=4.2) +
     theme_bw() +
     labs(x="", y="") +
     theme(axis.text.x = element_blank(),
@@ -108,7 +108,7 @@ main <- function(){
           legend.title=element_text(size=13),
           legend.text=element_text(size=12))+
     guides(size=guide_legend(override.aes=list(colour="grey"))) +
-    scale_colour_manual("Does it match?", values = c("at least one"="#12aab5", "no"="#7C2F5B")) +
+    scale_colour_manual("Does the subtheme match to \n a multiple-choice question?", values = c("at least one"="#12aab5", "no"="#7C2F5B")) +
     scale_size_continuous("Number of Comments") +
     guides(colour = guide_legend(override.aes = list(size=3.5)))
   mc_subtheme
@@ -116,7 +116,7 @@ main <- function(){
   # save plot created as an image
   ggsave(output_file,
          plot=mc_subtheme,
-         width=10, dpi=500)
+         width=14, dpi=500)
   
 }
 
