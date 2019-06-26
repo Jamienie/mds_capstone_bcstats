@@ -7,7 +7,11 @@
 
 # Makefile USAGE:
 '''
-python src/models/conv1d.py
+python src/models/conv1d.py \
+--input_csv data/interim/train_2018-qualitative-data.csv \
+--input_pk1 models/embed_matrices.pickle \
+--input_pk2 data/processed/X_train_encoded.pickle \
+--output_h5 models/conv1d_models.h5
 '''
 
 # Import Modules
@@ -17,29 +21,49 @@ import numpy as np
 from keras.layers import Dense, Embedding, Dropout, Activation
 from keras.layers import GlobalMaxPooling1D, Conv1D
 from keras.models import Sequential
+import argparse
 
 
-def train_conv1d(X_train, Y_train, embed_name, max_features,embed_matrix=False):
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Build Conv1d Model')
 
+    parser.add_argument('--input_csv', '-i', type=str, dest='input_csv',
+                        action='store',
+                        help='the input csv file with comments and labels')
+
+    parser.add_argument('--input_pk1', '-i2', type=str, dest='input_pk1',
+                        action='store',
+                        help='the input embedding_matrix')
+
+    parser.add_argument('--input_pk2', '-i3', type=str, dest='input_pk2',
+                        action='store',
+                        help='input encoded comments')
+
+    parser.add_argument('--output_h5', '-o', type=str,
+                        dest='output_h5', action='store',
+                        help='the output conv1d model')
+
+    args = parser.parse_args()
+    return args
+
+
+def train_conv1d(X_train, Y_train, embed_name, embed_matrix):
+
+    # Define parameters for Neural Net Architecture
+    max_features = embed_matrix.shape[0]
     maxlen = 700
     batch_size = 128
     filters = 250
     kernel_size = 3
     hidden_dims = 250
     epochs = 7
-    if embed_name == 'glove_twitter':
-        embed_size = 200
-    else:
-        embed_size = 300
+    embed_size = 300
 
     # Neural Net Architecture
     model = Sequential()
 
-    if embed_matrix is False:
-        model.add(Embedding(max_features, embed_size, input_length=maxlen))
-    else:
-        model.add(Embedding(max_features, embed_size, weights=[embed_matrix],
-                            trainable=False, input_length=maxlen))
+    model.add(Embedding(max_features, embed_size, weights=[embed_matrix],
+                        trainable=False, input_length=maxlen))
 
     model.add(Dropout(0.2))
     model.add(Conv1D(filters, kernel_size, padding='valid', activation='relu',
@@ -63,38 +87,25 @@ def train_conv1d(X_train, Y_train, embed_name, max_features,embed_matrix=False):
 ###############################################################################
 if __name__ == "__main__":
 
-    embed_names = ['base', 'glove_crawl', 'glove_twitter', 'glove_wiki',
-                   'fasttext_crawl', 'fasttext_wiki', 'w2v_google_news']
+    args = get_arguments()
+
+    embed = 'glove_wiki'
 
     # Get labels
-    df = pd.read_csv('./data/interim/train_2018-qualitative-data.csv')
+    df = pd.read_csv(args.input_csv)
     Y_train = np.array(df.loc[:, "CPD":"OTH"])
 
     # Load embedding matrices
-    with open('src/models/embed_matrices.pickle', 'rb') as handle:
+    with open(args.input_pk1, 'rb') as handle:
         embed_matrices = pickle.load(handle)
 
     # Load training data
-    with open('./data/processed/X_train_encoded.pickle', 'rb') as handle:
+    with open(args.input_pk2, 'rb') as handle:
         X_train_encoded = pickle.load(handle)
 
     # Train Conv1d models and save in the models folder
-    conv1d_models = {}
-    for embed in embed_names:
-        print('Training conv1d on', embed, 'embedding')
-        if embed == 'base':
-            embed_size = np.max(np.ravel(X_train_encoded[embed])) + 1
-            conv1d_models[embed] = train_conv1d(X_train_encoded[embed],
-                                                Y_train,
-                                                embed,
-                                                embed_size,
-                                                False)
-        else:
-            conv1d_models[embed] = train_conv1d(X_train_encoded[embed],
-                                                Y_train,
-                                                embed,
-                                                embed_matrices[embed].shape[0],
-                                                embed_matrices[embed])
+    print('Training conv1d on', embed, 'embedding')
+    conv1d_model = train_conv1d(X_train_encoded[embed], Y_train, embed,
+                                embed_matrices[embed])
 
-    with open('src/models/conv1d_models.pickle', 'wb') as handle:
-        pickle.dump(conv1d_models, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    conv1d_model.save(args.output_h5)
