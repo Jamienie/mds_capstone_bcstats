@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun  3 11:24:21 2019
+emotion_analysis.py
+Aaron Quinton, Ayla Pearson and Fan Nie
+June 2019
 
-@author: payla
+This package performs emotion analysis. 
+
+Usage
+-----
+This file can be imported as python module and all funtions can be used:
+    
+    Example:
+    `from src.analysis.text_summary import generate_text_summary`
+
 """
 
 import spacy
@@ -14,6 +24,194 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import numpy as np
 import random
+
+
+###############################################################################
+# Pre-process the raw data                                                    #
+###############################################################################
+
+def get_theme_labels(data, legend):
+    """
+    Obtains the main theme numbers
+
+    Parameters
+    ----------
+    data: dataframe
+        Dataframe that has the subtheme codes present in a column named 'code'
+    legend: dataframe
+        Legend that contains the subtheme codes and associated theme names and
+        subtheme name
+
+    Returns
+    -------
+    Returns a dataframe with a new column that has the main theme number 
+    and subtheme name
+
+    """
+    
+    print("")
+    # create copy so original is not overwritten
+    data = data.copy()
+
+    if 'code' not in data.columns:
+        raise TypeError("'code' column not present in this dataset")
+    if 'code' not in legend.columns:
+        raise TypeError("'code' column not present in the legend")
+    # ensure column is an int
+    data['code'] = data['code'].astype(int)
+    # join the legend labels to the dataset
+    data = pd.merge(data, legend, on="code", how="left")
+    data = data.drop(["theme_num"], axis=1)
+    return data
+
+
+
+def tidy_raw_comments(data):
+    """
+    Takes in the full comment data and gathers the codes into a single column
+    while duplicating the text. This allows comparisons at the theme and 
+    sub-theme levels.
+
+    Parameters
+    ----------
+    data: dataframe
+        Input the raw survey comment data
+
+    Returns
+    -------
+    Returns a dataframe with the codes gathered into a single column. Comments
+    with multiple codes will be repeated.
+
+    """
+
+    data = data.copy()
+
+    # replace all blank spaces with NaN values
+    columns = ["code1", "code2", "code3", "code4", "code5"]
+    for i in columns:
+        if  is_numeric_dtype(data[i]) == False:
+            condition = (data[i] != ' ')
+            data[i] = data[i].where(condition, np.nan)
+
+    # gather all subtheme codes to a single column
+    data = pd.melt(data,
+                    id_vars=["USERID", "text"],
+                    value_vars=["code1", "code2", "code3", "code4", "code5"],
+                    value_name="code").dropna()[['USERID', "code", "text"]]
+    data['code'] = data['code'].astype(int)
+    return data
+
+
+
+def pre_process_comments(data, legend):
+    """
+    Tidy's the raw survey comments and add the theme and sub-theme names
+    to the data set
+    
+    Parameters
+    ----------
+    data: dataframe
+        Input the raw survey comment data
+    legend: dataframe
+        Legend that contains the subtheme codes and associated theme names and
+        subtheme name
+    
+    Returns
+    -------
+    Returns a dataframe with the codes gathered into a single column. Comments
+    with multiple codes will be repeated.
+
+    """
+    # create copy so original is not overwritten
+    data = data.copy()
+    # process the raw comments
+    data = tidy_raw_comments(data)
+    data = get_theme_labels(data, legend)
+    return data
+
+
+###############################################################################
+#  Create Matchers and Find Emotion Scores for each Comment                   #
+###############################################################################
+
+
+def create_emotion_matcher(emotion_lexicon):
+    """
+    Adds all the rules for the emotion from a lexicon to the SpaCy Matcher. 
+    The rule adds the words to the matcher all in lower case.
+
+    Parameters
+    -----------
+    emotion_lexicon: dataframe
+        Dataframe that has the words to be added to rules of the matcher
+        in a column named 'term'
+
+    Returns
+    -------
+    Matcher: Spacy Object
+        SpaCy matcher with all the words from the emotion lexicon added
+
+    """
+    matcher = Matcher(nlp.vocab)
+    for word in emotion_lexicon['term']:
+        dict_rule = {"LOWER" : word}
+        matcher.add(word, None, [dict_rule])
+
+    if not len(matcher) == emotion_lexicon.shape[0]:
+        raise TypeError("Not all words were added to matcher")
+
+    return matcher
+
+
+
+def emotion_strength(text, matcher, emotion_lexicon):
+    """
+    Gets the strength of the emotion for each comment. Strength is calculated
+    by summing the scores for each word.
+
+    Parameters
+    -------
+    text: SpaCy tokens
+        Give it the text to calculate emotion. This can be a word, sentence,
+        comment or document level. All words must be lower case or they
+        won't match with the matcher rules properly.
+    matcher: SpaCy Matcher
+        Matcher with the rules already created
+    emotion_lexicon: dataframe
+        Name of the emotion lexicon to relate the rule to the
+        strength of the emotion (anger, fear, sad, joy). Must have
+        the words under 'term' column and scores under 'score' column.
+
+    Returns
+    --------
+    emotion_strength: sum
+        Generates the strength of the emotion for the text
+
+    """
+    emotion_strength = []
+    for i in range(len(text)):
+        phrase_matches = matcher(text[i])
+        # only parse through the non-zero lists
+        if len(phrase_matches) != 0:
+            count = 0
+            # get the words from matched phrase
+            for match_id, start, end in phrase_matches:
+                words = []
+                span = text[i][start:end]
+
+                if not str(span).islower() == True:
+                    raise TypeError("Text is not lowercase")
+
+                words.append(span.text)
+                # sum of strength of words by cross referencing emotion lexicon
+                for j in words:
+                    value = emotion_lexicon[emotion_lexicon["term"] == j]['score'].tolist()[0]
+                    count = value + count
+            emotion_strength.append(count)
+        else:
+            emotion_strength.append(0)
+    return emotion_strength
+
 
 
 def obtain_emotion_scores(data, lexicon, anger=True, fear=True, sadness=True, joy=False):
@@ -78,81 +276,15 @@ def obtain_emotion_scores(data, lexicon, anger=True, fear=True, sadness=True, jo
     return data
 
 
-def create_emotion_matcher(emotion_lexicon):
-    """
-    Adds all the rules for the emotion from a lexicon to the SpaCy Matcher. The rule adds
-    the words to the matcher all in lower case.
-
-    Parameters
-    -----------
-    emotion_lexicon: dataframe
-        Dataframe that has the words to be added to rules of the matcher
-        in a column named 'term'
-
-    Returns
-    -------
-    Matcher: Spacy Object
-        SpaCy matcher with all the words from the emotion lexicon added
-
-    """
-    matcher = Matcher(nlp.vocab)
-    for word in emotion_lexicon['term']:
-        dict_rule = {"LOWER" : word}
-        matcher.add(word, None, [dict_rule])
-
-    if not len(matcher) == emotion_lexicon.shape[0]:
-        raise TypeError("Not all words were added to matcher")
-
-    return matcher
 
 
-def emotion_strength(text, matcher, emotion_lexicon):
-    """
-    Gets the strength of the emotion for each comment. Strength is calculated
-    by summing the scores for each word.
+###############################################################################
+#  Analyze Emotion Data                #
+###############################################################################
 
-    Parameters
-    -------
-    text: SpaCy tokens
-        Give it the text to calculate emotion. This can be a word, sentence,
-        comment or document level. All words must be lower case or they
-        won't match with the matcher rules properly.
-    matcher: SpaCy Matcher
-        Matcher with the rules already created
-    emotion_lexicon: dataframe
-        Name of the emotion lexicon to relate the rule to the
-        strength of the emotion (anger, fear, sad, joy). Must have
-        the words under 'term' column and scores under 'score' column.
 
-    Returns
-    --------
-    emotion_strength: sum
-        Generates the strength of the emotion for the text
 
-    """
-    emotion_strength = []
-    for i in range(len(text)):
-        phrase_matches = matcher(text[i])
-        # only parse through the non-zero lists
-        if len(phrase_matches) != 0:
-            count = 0
-            # get the words from matched phrase
-            for match_id, start, end in phrase_matches:
-                words = []
-                span = text[i][start:end]
 
-                if not str(span).islower() == True:
-                    raise TypeError("Text is not lowercase")
-
-                words.append(span.text)
-                # sum of strength of words by cross referencing emotion lexicon
-                for j in words:
-                    value = emotion_lexicon[emotion_lexicon["term"] == j]['score'].tolist()[0]
-                    count = value + count
-            emotion_strength.append(count)
-        else:
-            emotion_strength.append(0)
-    return emotion_strength
 
 
 def one_hot_emotions(data, groupby=None, agreement=None):
@@ -351,7 +483,11 @@ def create_bar_plot(agreement, data, title):
         return fig;
     
     
-def create_bar_plot_percent(data ):
+    
+    
+    
+    
+def create_bar_plot_percent(data):
     """
     
     
@@ -546,75 +682,7 @@ def plot_data(data, depth=None, name=None, agreement=None):
 
 
 
-def get_theme_labels(data, legend):
-    """
-    Obtains the main theme numbers
 
-    Parameters
-    ----------
-    data: dataframe
-        Dataframe that has the subtheme codes present in a column named 'code'
-    legend: dataframe
-        Legend that contains the subtheme codes and associated theme names and
-        subtheme name
-
-    Returns
-    -------
-    Returns a dataframe with a new column that has the main theme number and subtheme
-    name
-
-    """
-    # create copy so original is not overwritten
-    data = data.copy()
-
-    if 'code' not in data.columns:
-        raise TypeError("'code' column not present in this dataset")
-    if 'code' not in legend.columns:
-        raise TypeError("'code' column not present in the legend")
-    # ensure column is an int
-    data['code'] = data['code'].astype(int)
-    # join the legend labels to the dataset
-    data = pd.merge(data, legend, on="code", how="left")
-
-    return data
-
-
-
-def format_raw_comments(data):
-    """
-    Takes in the full comment data and gathers the codes into a single column
-    while duplicating the text. This allows comparisons at the theme and sub theme
-    levels.
-
-    Parameters
-    ----------
-    data: dataframe
-        Input the raw survey comment data
-
-    Returns
-    -------
-    Returns a dataframe with the codes gathered into a single column. Comments
-    with multiple codes will be repeated.
-
-    """
-
-    data = data.copy()
-
-    # replace all blank spaces with NaN values
-    columns = ["code1", "code2", "code3", "code4", "code5"]
-    for i in columns:
-        if  is_numeric_dtype(data[i]) == False:
-            condition = (data[i] != ' ')
-            data[i] = data[i].where(condition, np.nan)
-
-    # gather all subtheme codes to a single column
-    data = pd.melt(data,
-                    id_vars=["USERID", "text"],
-                    value_vars=["code1", "code2", "code3", "code4", "code5"],
-                    value_name="code").dropna()[['USERID', "code", "text"]]
-    data['code'] = data['code'].astype(int)
-   
-    return data
 
 
 
@@ -655,6 +723,12 @@ def normalize_scores(data):
 
 
 
+###############################################################################
+#  Explore Results                                                            #
+###############################################################################
+
+
+
 def display_top_emotions(data, emotion, n, order=False, normalize=False):
     """
     Display's either the highest or lowest emotion scores for the selected
@@ -671,11 +745,12 @@ def display_top_emotions(data, emotion, n, order=False, normalize=False):
     n: int
         The number of comments to display
     order: bool
-        Whether to show the top or bottom comments. The highest scores are shown by False
-        which is the default.
+        Whether to show the top or bottom comments. The highest scores are 
+        shown by False which is the default.
     normalize: bool
-        Can choose whether to divide the scores by the number of words. The default is to
-        False which means they are not normalized, to normalize change to True.
+        Can choose whether to divide the scores by the number of words. The 
+        default is to False which means they are not normalized, to 
+        normalize change to True.
 
     Returns
     -------
