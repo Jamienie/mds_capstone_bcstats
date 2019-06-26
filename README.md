@@ -40,19 +40,22 @@ The first step to reproduce the multi-label theme classification and qualitative
 #### Software and packages
 ```
 python
-- sklearn
-- skmultilearn
-- numpy
-- pandas
-- keras
-- matplotlib
-- random
-- spacy
-- re
-- nltk
 - argparse
 - gensim
+- keras
+- matplotlib
 - networkx
+- nltk
+- numpy
+- pandas
+- pickle
+- random
+- re
+- sklearn
+- skmultilearn
+- spacy
+- scipy
+- sys
 - wordcloud
 
 R
