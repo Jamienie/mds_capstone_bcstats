@@ -19,15 +19,15 @@ all: data/output/test_predictions.pickle
 # Run the two scripts step by step to prepare datasets for modelling
 ###########################################################################
 
-# full_input  =  data/raw/2018_wes_qual_sample.xlsx 
+# full_input  =  data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx 
 
 # 1. Desensitization text - identify sensitive text (people's names) and remove the comments entirely
 # usage: make data/interim/desensitized_qualitative-data2018.csv -f MakefileModel
 data/interim/desensitized_qualitative-data2018.csv : $(full_input) src/data/sensitive_text.py
 	python src/data/sensitive_text.py \
--i data/raw/2018_wes_qual_sample.xlsx \
+-i data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx \
 -o data/interim/desensitized_qualitative-data2018.csv \
--s 0
+-s 1
 
 # 2. Read 2018 desensitized qualitative data. Split for test/train
 # usage: make data/interim/test_2018-qualitative-data.csv data/interim/train_2018-qualitative-data.csv -f MakefileModel
