@@ -2,8 +2,8 @@
 # Author: Aaron Quinton
 # Date: 2019-05-20
 
-# Import `theme_results()` function to evaluate the accuracies and other
-# metrics for the text theme classification problem
+# functions used in the evaluate_results.ipynb notebook. Used for plotting
+# and investigating the results
 
 import numpy as np
 import pandas as pd
