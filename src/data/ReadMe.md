@@ -6,7 +6,6 @@
 | Script | Purpose                                 |
 |------------------|---------------------------------------------|
 | EDA_text.py	     | exploratory  data analysis   |
-| make_qual_dataset | combine 2015 and 2018 qualitative data for the purpose of exploratory data analysis only, not used in the modelling process   |
 | preprocessing_text.py   | it is used to preprocess|
 | sensitive_text.py  | identify and remove sensitive comments |
 |split_qual_data.py | split data into train and test
