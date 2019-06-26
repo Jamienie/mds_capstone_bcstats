@@ -59,9 +59,10 @@ python
 - wordcloud
 
 R
-- tidyverse
 - foreign
 - testthat
+- tidyverse
+- zoo
 ```
 
 #### Data  
