@@ -21,13 +21,12 @@ from keras.layers import GRU, concatenate
 from keras.models import Model
 from keras import backend as K
 
-K.set_learning_phase(1) 
+K.set_learning_phase(1)
 
 
-def train_biGRU(X_train, Y_train, embed_name, embed_matrix=False):
+def train_biGRU(X_train, Y_train, embed_name, max_features, embed_matrix=False):
 
     # Define parameters for Neural Net Architecture
-    max_features = 12000
     maxlen = 700
     batch_size = 128
     filters = 64
@@ -94,11 +93,14 @@ if __name__ == "__main__":
     for embed in embed_names:
         print('Training biGRU on', embed, 'embedding')
         if embed == 'base':
+            embed_size = np.max(np.ravel(X_train_encoded[embed])) + 1
             biGRU_models[embed] = train_biGRU(X_train_encoded[embed],
                                               Y_train, embed, False)
         else:
             biGRU_models[embed] = train_biGRU(X_train_encoded[embed],
-                                              Y_train, embed,
+                                              Y_train,
+                                              embed,
+                                              embed_matrices[embed].shape[0]
                                               embed_matrices[embed])
 
     with open('src/models/biGRU_models.pickle', 'wb') as handle:

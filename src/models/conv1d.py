@@ -19,10 +19,8 @@ from keras.layers import GlobalMaxPooling1D, Conv1D
 from keras.models import Sequential
 
 
-def train_conv1d(X_train, Y_train, embed_name, embed_matrix=False):
+def train_conv1d(X_train, Y_train, embed_name, max_features,embed_matrix=False):
 
-    # Define parameters for Neural Net Architecture
-    max_features = 12000
     maxlen = 700
     batch_size = 128
     filters = 250
@@ -85,11 +83,17 @@ if __name__ == "__main__":
     for embed in embed_names:
         print('Training conv1d on', embed, 'embedding')
         if embed == 'base':
+            embed_size = np.max(np.ravel(X_train_encoded[embed])) + 1
             conv1d_models[embed] = train_conv1d(X_train_encoded[embed],
-                                                Y_train, embed, False)
+                                                Y_train,
+                                                embed,
+                                                embed_size,
+                                                False)
         else:
             conv1d_models[embed] = train_conv1d(X_train_encoded[embed],
-                                                Y_train, embed,
+                                                Y_train,
+                                                embed,
+                                                embed_matrices[embed].shape[0],
                                                 embed_matrices[embed])
 
     with open('src/models/conv1d_models.pickle', 'wb') as handle:
