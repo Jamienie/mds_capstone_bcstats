@@ -10,24 +10,30 @@
 # The csv can be downloaded on kaggle at the following link:
 # https://www.kaggle.com/kaggle/us-baby-names#NationalNames.csv
 
-# Makefile USAGE:
-# For the 2018 data:
-'''
-python src/data/sensitive_text.py
-'''
-# For the 2015 data:
+# For Makefile, you only need to decide to use one or the other below:
+
+# USAGE:
 '''
 python src/data/sensitive_text.py \
---input_xlsx data/raw/WES2015_Final_Qual_Results.xlsx \
---output_csv data/interim/desensitized_qualitative-data2015.csv \
+--input_xlsx data/raw/2018\ WES\ Qual\ Coded\ -\ Final\ Comments\ and\ Codes.xlsx \
+--output_csv data/interim/desensitized_qualitative-data2018.csv \
+--skiprows 1
+'''
+
+# USAGE for Sample Data:
+'''
+python src/data/sensitive_text.py \
+--input_xlsx data/raw/2018_wes_qual_sample.xlsx \
+--output_csv data/interim/desensitized_qualitative-data2018.csv \
 --skiprows 0
 '''
+
 
 # Import Modules
 import pandas as pd
 import spacy
 import argparse
-
+import numpy as np
 
 # Default File paths:
 filepath_in = "data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx"
@@ -120,6 +126,7 @@ def find_sensitive_text(comments):
 def remove_sensitive_text(filepath, skiprows):
 
     df = pd.read_excel(filepath, skiprows=skiprows)
+    df = df[df.iloc[:, 1].isnull() == False]
     comments = df.iloc[:, 1]
     sensitive_indices = find_sensitive_text(comments)
     df = df.drop(index=sensitive_indices)

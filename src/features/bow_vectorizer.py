@@ -4,10 +4,11 @@
 
 # This script file builds the bow vectorizer to be used later in the model
 
-# Makefile USAGE:
-# For the 2018 data:
+# USAGE:
 '''
-python src/features/bow_vectorizer.py
+python src/features/bow_vectorizer.py \
+--input_csv data/interim/train_2018-qualitative-data.csv \
+--output_pk models/bow_vectorizer.pickle
 '''
 
 
@@ -24,6 +25,7 @@ import pickle
 
 # Default file paths
 filepath_in = "data/interim/train_2018-qualitative-data.csv"
+filepath_out = "models/bow_vectorizer.pickle"
 
 
 def get_arguments():
@@ -33,6 +35,10 @@ def get_arguments():
     parser.add_argument('--input_csv', '-i', type=str, dest='input_csv',
                         action='store', default=filepath_in,
                         help='the input csv file with comments')
+
+    parser.add_argument('--output_pk', '-o', type=str, dest='output_pk',
+                        action='store', default=filepath_out,
+                        help='the test output csv file')
 
     args = parser.parse_args()
     return args
@@ -58,5 +64,5 @@ if __name__ == "__main__":
 
     bow_vectorizer = get_bow_vectorizer(comments)
 
-    with open("src/models/bow_vectorizer.pickle", 'wb') as handle:
+    with open(args.output_pk, 'wb') as handle:
         pickle.dump(bow_vectorizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
