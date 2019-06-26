@@ -33,7 +33,7 @@ The focus of this project can be split into two components.
 2. Utilize data science tools to better understand the comments and investigate how they relate to the survey's multiple choice questions.
 
 ## Getting Started <a name = "getting_started"></a>
-The first step to reproduce the multi-label theme classification and qualitative to quantitative linking, is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis. However to make solely make theme classifications on new comments you do not need the Data and Pre-trained embedding prerequisites.
+The first step to reproduce the multi-label theme classification and qualitative to quantitative linking, is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis. However to solely make theme classifications on new comments you do not need the Data and Pre-trained embedding prerequisites.
 
 ### Prerequisites
 
