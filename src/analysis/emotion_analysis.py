@@ -15,15 +15,15 @@ This file can be imported as python module and all functions can be used:
 
 """
 
-import spacy
+import spacy                         # Version 2.1.3
 from spacy.matcher import Matcher
 nlp = spacy.load('en_core_web_sm')
 
-import matplotlib.pyplot as plt
-import pandas as pd
-from pandas.api.types import is_numeric_dtype
-import numpy as np
-import random
+import matplotlib.pyplot as plt               # Version 3.0.2
+import pandas as pd                           # Version 0.23.4
+from pandas.api.types import is_numeric_dtype 
+import numpy as np                            # Version 1.16.2
+import random                                 # Version 3.7
 
 
 ###############################################################################
