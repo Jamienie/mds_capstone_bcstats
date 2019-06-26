@@ -92,6 +92,8 @@ python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings.nosy
 ```
 
 ## Usage - Text Classification<a name="usage1"></a>
+#### Run Classifier
+
 You can quickly make text classifications by running the `run_classifier.py` script. This script makes theme classifications by utilizing the `conv1d_models.h5`, `biGRU_glove_wiki.h5`, `biGRU_glove_crawl.h5`, and `biGRU_fasttext_crawl.h5` models located in the models folder. To make predictions simply run the below script at the command line. For recommendations on how to best use the model, see the Data Product and Results section of the Final Report.
 ```
 python src/models/run_classifier.py \
@@ -106,6 +108,13 @@ The `input_csv` and `output_csv` file path should be specified to be in the pred
 |Example ID 2| Example Comment 2|
 |...| ...|
 
+#### Run Example Prediction
+For demo purposes you can test the prediction by running the command below in the project root. This will prompt you for a comment that it will predict on.
+```
+python src/models/example_predict.py
+```
+
+#### Reproduce Analysis
 To rerun the analysis in full and re-train the models for prediction use the following command at the project root directory:
 ```
 make all -f MakefileModel
@@ -141,9 +150,9 @@ The correct folder structure is detailed below with all the directories for this
 .
 ├── data
 │   ├── interim
+│   ├── output
 │   ├── processed
-│   ├── raw
-|   └── output
+|   └── raw
 ├── models
 ├── notebooks
 ├── predict
@@ -155,7 +164,7 @@ The correct folder structure is detailed below with all the directories for this
 │   ├── meeting_minutes
 │   └── pretrained_embeddings.nosync
 │       ├── fasttext
-│       ├── glove
+│       └── glove
 ├── reports
 │   ├── figures
 └── src
