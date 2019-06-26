@@ -99,7 +99,7 @@ def find_sensitive_text(comments):
 
     # Apply Named entity recognition on list of comments
     nlp = spacy.load("en_core_web_sm")
-    docs = [nlp(comment) for comment in comments]
+    docs = [nlp(str(comment)) for comment in comments]
 
     # Create a list of the words tagged as PERSON and the original index
     person_index = []

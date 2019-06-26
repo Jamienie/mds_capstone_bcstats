@@ -12,14 +12,17 @@ break the analysis up is as follows:
 4. Create the corpus from individual comments
 5. Generate the summary
 
-The generate_text_summary function can be imported and ran as a function directly
-or it can be called from the command line as a script. 
+Usage
+-----
+This file can be imported as python module and all funtions can be used:
+    
+    Example:
+    `from src.analysis.text_summary import generate_text_summary`
 
-To run from the command line here is an example:
-
-Navigate to the project root and then run:
-
-python -m src.analysis.text_summary .\data\interim\joined_qual_quant.csv ./references/data-dictionaries/theme_subtheme_names.csv 200 theme Supervisors strong textrank
+The generate_text_summary function can be called from the command line as a script:
+    
+    Example:
+    python -m src.analysis.text_summary .\data\interim\joined_qual_quant.csv ./references/data-dictionaries/theme_subtheme_names.csv 200 theme Supervisors strong textrank
 
 
 """

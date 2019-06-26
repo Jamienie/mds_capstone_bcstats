@@ -40,6 +40,7 @@ The first step to reproduce this analysis or use the text classification model i
 ```
 python
 - sklearn
+- skmultilearn
 - numpy
 - pandas
 - keras
@@ -69,7 +70,7 @@ To fully reproduce the analysis you need the following data files stored on your
 To illustrate the project workflow we have provided sanitized sample files in the `data/raw/` directory.
 
 #### Pre-trained embeddings
-The text classification model makes use of several pre-trained word embeddings. The required file paths and links to download are provided below:   
+The text classification model makes use of several pre-trained word embeddings. The required file paths and links to download are provided below. Ensure to unzip the compressed files and have the formats exactly as below before running the keras_embeddings.py script, as this script can take over an hour to run and requires all the embeddings below. 
 
 Word2Vec [1] | Google News [[Link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit)]
 ```
@@ -89,13 +90,13 @@ GloVe [3] | Wikipedia | Common Crawl | Twitter [[Link](https://nlp.stanford.edu/
 - references/pretrained_embeddings.nosync/glove/glove.twitter.27B.200d.w2v.txt
 ```
 
-In order to use the GloVe embeddings they first need to be converted to w2v format. After downloading them from the link above you need to run the following script at the command line.
+In order to use the GloVe embeddings they first need to be converted to w2v format. After downloading them from the link above you need to run the following script at the command line from the project root.
 ```
-python -m gensim.scripts.glove2word2vec -i "glove.6B.300d.txt" -o "glove.6B.300d.w2v.txt"
+python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.6B.300d.txt -o references/pretrained_embeddings/glove/glove.6B.300d.w2v.txt
 
-python -m gensim.scripts.glove2word2vec -i "glove.840B.300d.txt" -o "glove.840B.300d.w2v.txt"
+python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.840B.300d.txt -o references/pretrained_embeddings/glove/glove.840B.300d.w2v.txt
 
-python -m gensim.scripts.glove2word2vec -i "glove.twitter.27B.200d.txt" -o "glove.twitter.27B.200d.w2v.txt"
+python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.twitter.27B.200d.txt -o references/pretrained_embeddings/glove/glove.twitter.27B.200d.w2v.txt
 ```
 
 ## Usage <a name="usage"></a>
@@ -146,6 +147,8 @@ The correct folder structure is detailed below with all the directories for this
 │   ├── interim
 │   ├── processed
 │   ├── raw
+|   └── output
+├── models
 ├── notebooks
 ├── predict
 |   ├── predict_input
