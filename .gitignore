@@ -6,12 +6,26 @@ references/data-dictionaries/NationalNames.csv
 src/data/__pycache__/
 src/models/__pycache__/
 src/features/__pycache__/
-references/pretrained_embeddings.nosync
-references/pretrained_embeddings
+references/pretrained_embeddings.nosync/fasttext/crawl-300d-2M.vec
+references/pretrained_embeddings.nosync/fasttext/wiki-news-300d-1M.vec
+references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt
+references/pretrained_embeddings.nosync/glove/glove.twitter.27B.200d.w2v.txt
+references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt
+references/pretrained_embeddings.nosync/w2v/GoogleNews-vectors-negative300.bin
 data/raw/2018 WES Qual Coded - Final Comments and Codes.xlsx
 data/raw/WES 2007-2018 LONGITUDINAL DATA.sav
 data/raw/WES 2007-2018 LONGITUDINAL DATA_short.sav
 data/raw/WES2015_Final_Qual_Results.xlsx
-data/processed
-data/interim
-./models/
+data/interim/test_2018-qualitative-data.csv
+data/interim/train_2018-qualitative-data.csv
+data/interim/desensitized_qualitative-data2018.csv
+models/bow_vectorizer.pickle
+data/processed/X_test_bow.npz
+data/processed/X_train_bow.npz
+models/linearsvc_model.pickle
+data/processed/X_test_encoded.pickle
+data/processed/X_train_encoded.pickle
+data/processed/tidy_quant_demographics.csv
+data/processed/tidy_quant_questions.csv
+models/embed_tokenizers.pickle
+models/embed_matrices.pickle
