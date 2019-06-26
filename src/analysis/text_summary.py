@@ -427,7 +427,7 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
     # load and save the pretrained embeddings
     # geneate summary with 5 sentences for subtheme 13 with weak agreement
     summary, loaded_embedding = generate_text_summary(".\data\interim\
-                                        joined_qual_quant.csv",
+                                        linking_joined_qual_quant.csv",
                                         5,
                                         "subtheme",
                                         13,
@@ -438,7 +438,7 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
                                         embedding_return=True)
 
     # now use the loaded embeddings to speed up the run time
-    generate_text_summary(".\data\interim\joined_qual_quant.csv",
+    generate_text_summary(".\data\interim\linking_joined_qual_quant.csv",
                                     5,
                                     "subtheme",
                                     13,
@@ -448,7 +448,7 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
 
     # to generate a summary with 200 characters for subtheme 13 with
     # weak agreement
-    generate_text_summary(".\data\interim\joined_qual_quant.csv",
+    generate_text_summary(".\data\interim\linking_joined_qual_quant.csv",
                                         200,
                                         "subtheme",
                                         13,
@@ -457,7 +457,7 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
 
     # generate a summary 100 characters long for theme Supervisors with
     # strong agreement
-    generate_text_summary(".\data\interim\joined_qual_quant.csv",
+    generate_text_summary(".\data\interim\linking_joined_qual_quant.csv",
                                         100,
                                         "theme",
                                         Supervisors,
@@ -466,7 +466,7 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
 
     # generate a summary 100 characters long for theme Supervisors with
     # strong agreement but choose to not have it write  a csv
-    generate_text_summary(".\data\interim\joined_qual_quant.csv",
+    generate_text_summary(".\data\interim\linking_joined_qual_quant.csv",
                                         100,
                                         "theme",
                                         Supervisors,
@@ -483,6 +483,9 @@ def generate_text_summary(input_file, summary_size, depth, name, agreement,
                                            name=name,
                                            agreement=agreement,
                                            sentences=True)
+
+    if method not in ["pagerank", "textrank"]:
+        raise TypeError("incorrect method selected")
     # PageRank with word embeddings
     if method == "pagerank":
         if isinstance(embedding_file, str) == True:
