@@ -8,10 +8,15 @@
 # models folder. To run this script you need to have the required pretrained
 # embeddings in the reference folder. See Readme for more details
 
-# Makefile USAGE:
-# For the 2018 data:
+# USAGE:
 '''
-python src/features/keras_embeddings.py
+python src/features/keras_embeddings.py \
+--input_csv data/interim/train_2018-qualitative-data.csv \
+--input_embed_glove_crawl references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt \
+--input_embed_glove_wiki references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt \
+--input_embed_fasttext_crawl references/pretrained_embeddings.nosync/fasttext/crawl-300d-2M.vec \
+--output_pk1 models/embed_tokenizers.pickle \
+--output_pk2 models/embed_matrices.pickle
 '''
 
 # Import Modules
@@ -26,17 +31,36 @@ from keras.preprocessing.text import Tokenizer
 from gensim.models import KeyedVectors
 
 
-# Default File paths:
-filepath_in = 'data/interim/train_2018-qualitative-data.csv'
-
-
 def get_arguments():
     parser = argparse.ArgumentParser(description='Get comment data to build'
                                      'tokenizers and embedding matrices')
 
     parser.add_argument('--input_csv', '-i', type=str, dest='input_csv',
-                        action='store', default=filepath_in,
+                        action='store',
                         help='the input csv file with comments')
+
+    parser.add_argument('--input_embed_glove_crawl', type=str,
+                        dest='input_embed_glove_crawl',
+                        action='store',
+                        help='the input glove crawl embed')
+
+    parser.add_argument('--input_embed_glove_wiki', type=str,
+                        dest='input_embed_glove_wiki',
+                        action='store',
+                        help='the input glove wiki embed')
+
+    parser.add_argument('--input_embed_fasttext_crawl', type=str,
+                        dest='input_embed_fasttext_crawl',
+                        action='store',
+                        help='the input glove fasttext embed')
+
+    parser.add_argument('--output_pk1', '-o1', type=str,
+                        dest='output_pk1', action='store',
+                        help='the output embed tokenizer')
+
+    parser.add_argument('--output_pk2', '-o2', type=str,
+                        dest='output_pk2', action='store',
+                        help='the output embed matrix')
 
     args = parser.parse_args()
     return args
@@ -79,19 +103,12 @@ if __name__ == "__main__":
     args = get_arguments()
 
     # Default file paths for pre trained embeddings
-    # NOTE: for MAC: path = "'./references/pretrained_embeddings.nosync/'
-    #       for Windows: path = "'./references/pretrained_embeddings/'
-    path = './references/pretrained_embeddings/'
     embedding_fnames = {
-        'glove_crawl': path + 'glove/glove.840B.300d.w2v.txt',
-        'glove_twitter': path + 'glove/glove.twitter.27B.200d.w2v.txt',
-        'glove_wiki': path + 'glove/glove.6B.300d.w2v.txt',
-        'fasttext_crawl': path + 'fasttext/crawl-300d-2M.vec',
-        'fasttext_wiki': path + 'fasttext/wiki-news-300d-1M.vec',
-        'w2v_google_news': path + 'w2v/GoogleNews-vectors-negative300.bin'}
+        'glove_crawl': args.input_embed_glove_crawl,
+        'glove_wiki': args.input_embed_glove_wiki,
+        'fasttext_crawl': args.input_embed_fasttext_crawl}
 
-    embed_names = ['base', 'glove_crawl', 'glove_twitter', 'glove_wiki',
-                   'fasttext_crawl', 'fasttext_wiki', 'w2v_google_news']
+    embed_names = ['glove_crawl', 'glove_wiki', 'fasttext_crawl']
 
     df = pd.read_csv(args.input_csv)
     comments = df.iloc[:, 1]
@@ -103,33 +120,23 @@ if __name__ == "__main__":
     for embed in embed_names:
         embed_tokenizers[embed] = get_embed_tokenizer(comments, embed)
 
-    with open('src/models/embed_tokenizers.pickle', 'wb') as handle:
+    with open(args.output_pk1, 'wb') as handle:
         pickle.dump(embed_tokenizers, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # Load pretrained embeddings
     embed_indices = {}
     for embed in embedding_fnames.keys():
-        print('Loading pretrained embedding for ', embed)
-        if embed == 'w2v_google_news':
-            binary = True
-        else:
-            binary = False
+        print('Loading pretrained embedding for', embed)
         embed_indices[embed] = KeyedVectors.load_word2vec_format(
                                     embedding_fnames[embed],
                                     unicode_errors='ignore',
-                                    binary=binary)
+                                    binary=False)
 
     # Get and save the embedding matrix for each embedding
     embed_matrices = {}
     for embed in embedding_fnames.keys():
-        if embed == 'glove_twitter':
-            embed_size = 200
-        else:
-            embed_size = 300
-
         embed_matrices[embed] = get_embed_matrix(embed_indices[embed],
-                                                 embed_tokenizers[embed],
-                                                 embed_size)
+                                                 embed_tokenizers[embed])
 
-    with open('src/models/embed_matrices.pickle', 'wb') as handle:
+    with open(args.output_pk2, 'wb') as handle:
         pickle.dump(embed_matrices, handle, protocol=pickle.HIGHEST_PROTOCOL)

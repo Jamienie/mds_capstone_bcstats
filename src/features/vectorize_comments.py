@@ -3,8 +3,8 @@
 # Date: 2019-06-11
 
 # This script vectorizes comments for later training
-# For MakeFile do both usages
 
+# For MakeFile do both usages
 # USAGE for train data:
 '''
 python src/features/vectorize_comments.py \
