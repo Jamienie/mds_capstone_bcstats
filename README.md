@@ -182,7 +182,11 @@ The folder structure and project organization has been adapted from [Cookiecutte
 
 ## Results <a name="results"></a>
 
-**create hyperlink to the final report once it is done**
+|Report|Description|
+|---|---|
+|[Final Report](https://github.com/UBC-MDS/DSCI_591_capstone-BCStats/blob/master/reports/BCStats_Final_Report.pdf)| Final BC Stats Capstone Report |
+|[Linking Methodology](https://github.com/UBC-MDS/DSCI_591_capstone-BCStats/blob/master/reports/linking_methodology.md)| Detailed Methodology for Linking Quantitative and Qualitative Data |
+|[Test Results](https://github.com/UBC-MDS/DSCI_591_capstone-BCStats/blob/master/notebooks/evaluate_results.ipynb)| Theme classification results notebook on test data |
 
 
 ## Authors <a name = "authors"></a>
