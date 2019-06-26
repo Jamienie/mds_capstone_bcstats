@@ -70,7 +70,7 @@ To fully reproduce the analysis you need the following data files stored on your
 To illustrate the project workflow we have provided sanitized sample files in the `data/raw/` directory.
 
 #### Pre-trained embeddings
-The text classification model makes use of three pre-trained word embeddings. The required file paths and links to download are provided below. Ensure to unzip the compressed files and have the formats exactly as below before running the keras_embeddings.py script, as this script can take over an hour to run and requires all the embeddings below.
+The text classification model makes use of three pre-trained word embeddings. The required file paths and links to download are provided below. Ensure to unzip the compressed files and have the formats exactly as below before running the keras_embeddings.py or text_summarization.py script, as this script can take over an hour to run and requires all the embeddings below.
 
 FastText [1] | Common Craw [[Link](https://fasttext.cc/docs/en/english-vectors.html)]
 ```
@@ -85,9 +85,9 @@ GloVe [2] | Wikipedia | Common Crawl [[Link](https://nlp.stanford.edu/projects/g
 
 In order to use the GloVe embeddings they first need to be converted to w2v format. After downloading them from the link above you need to run the following script at the command line from the project root.
 ```
-python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.6B.300d.txt -o references/pretrained_embeddings/glove/glove.6B.300d.w2v.txt
+python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings.nosync/glove/glove.6B.300d.txt -o references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt
 
-python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.840B.300d.txt -o references/pretrained_embeddings/glove/glove.840B.300d.w2v.txt
+python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings.nosync/glove/glove.840B.300d.txt -o references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt
 ```
 
 ## Usage <a name="usage"></a>
