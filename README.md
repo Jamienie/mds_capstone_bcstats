@@ -98,7 +98,7 @@ python src/models/run_classifier.py \
 --input_csv FILEPATH_IN \
 --output_csv FILEPATH_OUT
 ```
-The `input_csv` argument in the above code needs to be formatted according to the table below:
+The `input_csv` and `output_csv` file path should be specified to be in the predict folder. Additionaly, the `input_csv` needs to be formatted according to the table below:
 
 |user_id|comment|
 |---|---|
