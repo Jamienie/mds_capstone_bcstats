@@ -1,9 +1,9 @@
-<p align="center">
+qualitative<p align="center">
   <a href="" rel="noopener">
  <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
 </p>
 
-<h3 align="center">BC Stats Text Classification</h3>
+<h3 align="center">BC Stats Capstone | Quantifying the Responses to Open-Ended Survey Questions</h3>
 
 ---
 
@@ -32,7 +32,7 @@ The BC Stats organization conducts a [Work Environment Survey](https://www2.gov.
 2. Utilize data science tools to better understand the comments and investigate how they relate to the survey's multiple choice questions.
 
 ## Getting Started <a name = "getting_started"></a>
-The first step to reproduce this analysis or use the text classification model is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis and use the text classification model.
+The first step to reproduce the multi-label theme classification and qualitative to quantitative linking, is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis. However to make solely make theme classifications on new comments you do not need the Data and Pre-trained embedding prerequisites.
 
 ### Prerequisites
 
@@ -70,24 +70,17 @@ To fully reproduce the analysis you need the following data files stored on your
 To illustrate the project workflow we have provided sanitized sample files in the `data/raw/` directory.
 
 #### Pre-trained embeddings
-The text classification model makes use of several pre-trained word embeddings. The required file paths and links to download are provided below. Ensure to unzip the compressed files and have the formats exactly as below before running the keras_embeddings.py script, as this script can take over an hour to run and requires all the embeddings below. 
+The text classification model makes use of three pre-trained word embeddings. The required file paths and links to download are provided below. Ensure to unzip the compressed files and have the formats exactly as below before running the keras_embeddings.py script, as this script can take over an hour to run and requires all the embeddings below.
 
-Word2Vec [1] | Google News [[Link](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit)]
-```
- - references/pretrained_embeddings.nosync/w2v/GoogleNews-vectors-negative300.bin
-```
-
-FastText [2] | Common Crawl | Wikipedia [[Link](https://fasttext.cc/docs/en/english-vectors.html)]
+FastText [1] | Common Craw [[Link](https://fasttext.cc/docs/en/english-vectors.html)]
 ```
 - references/pretrained_embeddings.nosync/fasttext/crawl-300d-2M.vec
-- references/pretrained_embeddings.nosync/fasttext/wiki-news-300d-1M.vec
 ```
 
-GloVe [3] | Wikipedia | Common Crawl | Twitter [[Link](https://nlp.stanford.edu/projects/glove/)]
+GloVe [2] | Wikipedia | Common Crawl [[Link](https://nlp.stanford.edu/projects/glove/)]
 ```
 - references/pretrained_embeddings.nosync/glove/glove.6B.300d.w2v.txt
 - references/pretrained_embeddings.nosync/glove/glove.840B.300d.w2v.txt
-- references/pretrained_embeddings.nosync/glove/glove.twitter.27B.200d.w2v.txt
 ```
 
 In order to use the GloVe embeddings they first need to be converted to w2v format. After downloading them from the link above you need to run the following script at the command line from the project root.
@@ -95,24 +88,29 @@ In order to use the GloVe embeddings they first need to be converted to w2v form
 python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.6B.300d.txt -o references/pretrained_embeddings/glove/glove.6B.300d.w2v.txt
 
 python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.840B.300d.txt -o references/pretrained_embeddings/glove/glove.840B.300d.w2v.txt
-
-python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.twitter.27B.200d.txt -o references/pretrained_embeddings/glove/glove.twitter.27B.200d.w2v.txt
 ```
 
 ## Usage <a name="usage"></a>
-This project contains two separate makefiles, one to reproduce the text classification named `MakefileModel` and another for linking qualitative to quantitative called `MakefileLinking`. The makefiles are designed to be run from the project root through the command line.
+This project contains two separate makefiles, one to reproduce text classification modeling titled `MakefileModel` and another for reproducing the analysis that links the qualitative to quantitative data called `MakefileLinking`. The makefiles are designed to be run from the project root through the command line.
 
 **Text Classification**   
-To rerun the analysis in full and reproduce the models for prediction:
-```
-make all -f MakefileModel
-```
-
-With the models trained you can quickly make text classifications by running the run_classifier script. Your input_csv needs to be formatted the same as shown in the sample data file `data/raw/wes2018_comments_sample.csv`
+You can quickly make text classifications by running the `run_classifier.py` script. This script makes theme classifications by utilizing the `conv1d_models.h5`, `biGRU_glove_wiki.h5`, `biGRU_glove_crawl.h5`, and `biGRU_fasttext_crawl.h5` models located in the models folder. To make predictions simply run the below script at the command line. For recommendations on how to best use the model, see the Data Product and Results section of the Final Report.
 ```
 python src/models/run_classifier.py \
 --input_csv FILEPATH_IN
 --output_csv FILEPATH_OUT
+```
+The `input_csv` argument in the above code needs to be formatted according to the table below:
+
+|user_id|comment|
+|---|---|
+|Example ID 1| Example Comment 1|
+|Example ID 2| Example Comment 2|
+|...| ...|
+
+To rerun the analysis in full and re-train the models for prediction use the following command:
+```
+make all -f MakefileModel
 ```
 
 To remove all files associated with this section:
@@ -133,13 +131,13 @@ make clean -f MakefileLinking
 
 ## Dependencies <a name="dependencies"></a>
 **Text Classification**    
-![Text Classification](reports/figures/flow-chart_full.png)
+![Text Classification](reports/figures/flow-chart_full2.png)
 
 **Linking Qualitative to Quantitative**   
 ![Text Classification](reports/figures/flow-chart-linking.png)
 
 ## Navigating the Repository <a name="repo"></a>
-The correct folder structure is detailed below with all the directories for this project. Not all folders are present in this repository as they are local folders that were not pushed to the repository due to privacy or space limitations. Clone the repository and then manually create the missing folders to be able to reproduce the analysis.
+The correct folder structure is detailed below with all the directories for this project. By cloning the repository to your local computer you will have the same folder structure.
 
 ```
 .
@@ -185,11 +183,9 @@ Aaron Quinton | [@aaronquinton](https://github.com/aaronquinton)
 
 ## References <a name = "references"></a>
 
-> [1] Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg Corrado, and Jeffrey Dean. [Distributed Representations of Words and Phrases and their Compositionality](https://arxiv.org/pdf/1310.4546.pdf). In Proceedings of NIPS, 2013.
->
->[2] T. Mikolov, E. Grave, P. Bojanowski, C. Puhrsch, A. Joulin. [Advances in Pre-Training Distributed Word Representations](https://arxiv.org/abs/1712.09405)  
+>[1] T. Mikolov, E. Grave, P. Bojanowski, C. Puhrsch, A. Joulin. [Advances in Pre-Training Distributed Word Representations](https://arxiv.org/abs/1712.09405)  
 >  
-> [3] Jeffrey Pennington, Richard Socher, and Christopher D. Manning. 2014. [GloVe: Global Vectors for Word Representation](https://nlp.stanford.edu/pubs/glove.pdf)
+> [2] Jeffrey Pennington, Richard Socher, and Christopher D. Manning. 2014. [GloVe: Global Vectors for Word Representation](https://nlp.stanford.edu/pubs/glove.pdf)
 
 
 
