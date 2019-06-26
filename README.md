@@ -1,4 +1,4 @@
-qualitative<p align="center">
+<p align="center">
   <a href="" rel="noopener">
  <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
 </p>
@@ -14,7 +14,8 @@ qualitative<p align="center">
 ## Table of Contents
 - [About](#about)
 - [Getting Started](#getting_started)
-- [Usage](#usage)
+- [Usage - Text Classification](#usage1)
+- [Usage - Linking Quantitative and Qualitative](#usage2)
 - [Dependencies](#dependencies)
 - [Navigating the Repository](#repo)
 - [Results](#results)
@@ -26,7 +27,7 @@ qualitative<p align="center">
 The BC Stats organization conducts a [Work Environment Survey](https://www2.gov.bc.ca/gov/content/data/statistics/government/employee-research/wes) gathering information from government employees across the BC Public Service. The goal of this survey is to identify areas for improvement and to understand employee engagement. Currently the survey contains ~80 multiple choice questions and one open ended written response. The written response asks the employees "What one thing would you like your organization to focus on to improve your work environment?". The responses are manually classified into 12 broad themes and 68 sub-themes and the aggregated results are reported.
 
 
- The focus of this project can be split into two components.
+The focus of this project can be split into two components.
 1. Automate the text classification of the written responses using natural language processing.
 
 2. Utilize data science tools to better understand the comments and investigate how they relate to the survey's multiple choice questions.
@@ -90,14 +91,11 @@ python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glov
 python -m gensim.scripts.glove2word2vec -i references/pretrained_embeddings/glove/glove.840B.300d.txt -o references/pretrained_embeddings/glove/glove.840B.300d.w2v.txt
 ```
 
-## Usage <a name="usage"></a>
-This project contains two separate makefiles, one to reproduce text classification modeling titled `MakefileModel` and another for reproducing the analysis that links the qualitative to quantitative data called `MakefileLinking`. The makefiles are designed to be run from the project root through the command line.
-
-**Text Classification**   
+## Usage - Text Classification<a name="usage1"></a>
 You can quickly make text classifications by running the `run_classifier.py` script. This script makes theme classifications by utilizing the `conv1d_models.h5`, `biGRU_glove_wiki.h5`, `biGRU_glove_crawl.h5`, and `biGRU_fasttext_crawl.h5` models located in the models folder. To make predictions simply run the below script at the command line. For recommendations on how to best use the model, see the Data Product and Results section of the Final Report.
 ```
 python src/models/run_classifier.py \
---input_csv FILEPATH_IN
+--input_csv FILEPATH_IN \
 --output_csv FILEPATH_OUT
 ```
 The `input_csv` argument in the above code needs to be formatted according to the table below:
@@ -108,7 +106,7 @@ The `input_csv` argument in the above code needs to be formatted according to th
 |Example ID 2| Example Comment 2|
 |...| ...|
 
-To rerun the analysis in full and re-train the models for prediction use the following command:
+To rerun the analysis in full and re-train the models for prediction use the following command at the project root directory:
 ```
 make all -f MakefileModel
 ```
@@ -118,8 +116,8 @@ To remove all files associated with this section:
 make clean -f MakefileModel
 ```
 
-**Linking Qualitative to Quantitative**  
-To rerun the analysis in full and reproduce the results:
+## Usage - Linking Qualitative to Quantitative<a name="usage2"></a>
+The Linking analysis prepares figures and tables which are further discussed in the reports. To reproduce the analysis in full run the following command at the project root directory:
 ```
 make all -f MakefileLinking
 ```
@@ -158,7 +156,6 @@ The correct folder structure is detailed below with all the directories for this
 │   └── pretrained_embeddings.nosync
 │       ├── fasttext
 │       ├── glove
-│       └── w2v
 ├── reports
 │   ├── figures
 └── src
