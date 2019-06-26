@@ -5,7 +5,7 @@
 # This script defines a function that trains a convulutional neural net for
 # each embedding and saves it in the models folder.
 
-# Makefile USAGE:
+# USAGE:
 '''
 python src/models/conv1d.py \
 --input_csv data/interim/train_2018-qualitative-data.csv \
