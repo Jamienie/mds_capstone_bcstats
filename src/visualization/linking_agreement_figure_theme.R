@@ -115,7 +115,7 @@ main <- function(){
     expect_equal(sum(test1$n), 4)
   })
   # save figure if tests pass
-  ggsave(output_file, plot=theme, dpi=400, width=10, height=7)
+  ggsave(output_file, plot=theme, dpi=550, width=14, height=4.5)
   
 }
 
