@@ -39,11 +39,11 @@ src/data/sensitive_text.py
 
 # step 3: tidy quantitative data
 data/interim/tidy_quant_questions.csv : \
-data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA_short.sav \
+data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA.sav \
 references/data-dictionaries/survey_mc_legend.csv \
 src/data/tidy_quantitative_data.R
 	Rscript src/data/tidy_quantitative_data.R  \
-data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA_short.sav \
+data/raw/WES\ 2007-2018\ LONGITUDINAL\ DATA.sav \
 references/data-dictionaries/survey_mc_legend.csv \
 data/interim/tidy_quant_questions.csv
 
