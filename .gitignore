@@ -27,6 +27,5 @@ data/processed/X_test_encoded.pickle
 data/processed/X_train_encoded.pickle
 data/processed/tidy_quant_demographics.csv
 data/processed/tidy_quant_questions.csv
-models/embed_tokenizers.pickle
 models/embed_matrices.pickle
 data/output/test_predictions.pickle
