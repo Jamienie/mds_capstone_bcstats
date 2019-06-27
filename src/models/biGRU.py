@@ -25,6 +25,8 @@ from keras.layers import Bidirectional, Conv1D
 from keras.layers import GlobalMaxPooling1D, GlobalAveragePooling1D
 from keras.layers import GRU, concatenate
 from keras.models import Model
+from keras import backend as K
+K.set_learning_phase(1)
 import argparse
 
 
