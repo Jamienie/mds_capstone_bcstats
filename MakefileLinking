@@ -5,10 +5,10 @@
 # Purpose: This driver script opens runs the linking qualitative to quantitative analysis
 #
 # Usage: Navigate to project root and run from bash:
-#						To run the entire analysis     `make all -f MakefileLinking`
-#						To clean all items             `make clean -f MakefileLinking`
-#						To clean only the figures      `make clean_figures -f MakefileLinking`
-#						To clean only the interim data `make clean_cleandata -f MakefileLinking`
+#	 To run the entire analysis     `make all -f MakefileLinking`
+#	 To clean all items             `make clean -f MakefileLinking`
+#	 To clean only the figures      `make clean_figures -f MakefileLinking`
+#	 To clean only the interim data `make clean_cleandata -f MakefileLinking`
 
 ###############################################################################
 # Run all scripts at once   																									#
