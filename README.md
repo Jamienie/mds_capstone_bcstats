@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
+ <img width=200px height=200px src="https://github.com/UBC-MDS/DSCI_591_capstone-BCStats/blob/master/reports/figures/img_readme_cover.png" alt="Project logo"></a>
 </p>
 
 <h3 align="center">BC Stats Capstone | Quantifying the Responses to Open-Ended Survey Questions</h3>
@@ -36,6 +36,8 @@ The focus of this project can be split into two components.
 The first step to reproduce the multi-label theme classification and qualitative to quantitative linking, is to fork the repository. However due to sensitive information and file size limitations you will have to undergo additional steps to make sure you have the required files. The following requirements are needed to reproduce the analysis. However to solely make theme classifications on new comments you do not need the Data and Pre-trained embedding prerequisites.
 
 ### Prerequisites
+
+To use the example_predict.py script with the models saved in the repository you must have keras version 2.2.4 installed.
 
 #### Software and packages
 ```
