@@ -37,14 +37,14 @@ The first step to reproduce the multi-label theme classification and qualitative
 
 ### Prerequisites
 
-To use the example_predict.py script with the models saved in the repository you must have keras version 2.2.4 installed.
+To use the example_predict.py script with the pre-trained models the version of keras on your local machine must be 2.2.4.
 
 #### Software and packages
 ```
 python
 - argparse
 - gensim
-- keras
+- keras (Version 2.2.4)
 - matplotlib
 - networkx
 - nltk
